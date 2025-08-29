@@ -19,6 +19,9 @@ project "Davos"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "dvs_pch.h"
+	pchsource "Davos/src/dvs_pch.cpp"
+
 	files
 	{
 		"%{prj.name}/src/**.h",

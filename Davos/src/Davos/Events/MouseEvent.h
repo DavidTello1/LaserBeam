@@ -1,8 +1,6 @@
 #pragma once
 #include "Event.h"
 
-#include <sstream> //*** should not be included in Dist versions
-
 namespace Davos {
 
 	class DAVOS_API MouseMovedEvent : public Event
