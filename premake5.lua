@@ -11,6 +11,12 @@ workspace "Davos"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+-- Include directories relative to root folder (solution directory)
+IncludeDir = {}
+IncludeDir["GLFW"] = "Davos/vendor/GLFW/include"
+
+include "Davos/vendor/GLFW"
+
 project "Davos"
 	location "Davos"
 	kind "SharedLib"
@@ -31,7 +37,14 @@ project "Davos"
 	includedirs
 	{
 		"Davos/src",
-		"%{prj.name}/vendor/spdlog/include"
+		"%{prj.name}/vendor/spdlog/include",
+		"%{IncludeDir.GLFW}"
+	}
+
+	links
+	{
+		"GLFW",
+		"opengl32.lib"
 	}
 
 	filter "system:windows"
