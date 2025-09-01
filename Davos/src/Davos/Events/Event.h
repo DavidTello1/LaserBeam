@@ -68,9 +68,8 @@ namespace Davos {
 			return GetCategoryFlags() & category;
 		}
 
-	protected:
-		bool m_isHandled = false;
-
+	public:
+		bool isHandled = false;
 	};
 
 	class EventDispatcher
@@ -86,7 +85,7 @@ namespace Davos {
 		{
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
-				m_Event.m_isHandled = func(*(T*)&m_Event);
+				m_Event.isHandled = func(*(T*)&m_Event);
 				return true;
 			}
 
