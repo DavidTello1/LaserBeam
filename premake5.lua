@@ -67,14 +67,17 @@ project "Davos"
 	
 	filter "configurations:Debug"
 		defines "DVS_DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "DVS_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "DVS_DIST"
+		buildoptions "/MD"
 		optimize "On"
 
 
@@ -116,12 +119,15 @@ project "LaserBeam"
 	
 	filter "configurations:Debug"
 		defines "DVS_DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "DVS_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "DVS_DIST"
+		buildoptions "/MD"
 		optimize "On"
