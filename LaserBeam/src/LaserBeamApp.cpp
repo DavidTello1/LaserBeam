@@ -6,7 +6,7 @@ public:
 	ExampleLayer() : Layer("Example") {}
 
 	void OnUpdate() override {
-		DVS_INFO("ExampleLyaer::Update");
+		//DVS_INFO("ExampleLayer::Update");
 	}
 
 	void OnEvent(Davos::Event& event) override {
@@ -14,13 +14,14 @@ public:
 	}
 };
 
-// ----------------------------------
+// ---
 class LaserBeam : public Davos::Application
 {
 public:
 	LaserBeam() 
 	{
 		PushLayer(new ExampleLayer());
+		PushOverlay(new Davos::ImGuiLayer());
 	}
 
 	~LaserBeam() 
@@ -28,6 +29,7 @@ public:
 	}
 };
 
+// ----------------------------------
 Davos::Application* Davos::CreateApplication()
 {
 	return new LaserBeam();

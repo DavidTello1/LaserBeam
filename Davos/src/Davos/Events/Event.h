@@ -28,6 +28,7 @@ namespace Davos {
 		// Key Events
 		KeyPressed,
 		KeyReleased,
+		KeyTyped,
 
 		// Mouse Events
 		MouseMoved,

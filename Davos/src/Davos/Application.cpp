@@ -4,14 +4,19 @@
 #include "Davos/Events/Event.h"
 #include "Davos/Events/ApplicationEvent.h"
 
+#include <glad/glad.h> //**
+
 namespace Davos {
 
-#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
+	Application* Application::s_Instance = nullptr;
 
 	Application::Application()
 	{
+		DVS_CORE_ASSERT(!s_Instance, "Application already exists!");
+		s_Instance = this;
+
 		m_Window = std::unique_ptr<Window>(Window::Create());
-		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetEventCallback(DVS_BIND_EVENT_FN(Application::OnEvent));
 	}
 
 	Application::~Application()
@@ -22,6 +27,9 @@ namespace Davos {
 	{
 		while (m_isRunning)
 		{
+			glClearColor(1, 0, 1, 1); //***
+			glClear(GL_COLOR_BUFFER_BIT); //***
+
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
 
@@ -32,18 +40,20 @@ namespace Davos {
 	void Application::PushLayer(Layer* layer)
 	{
 		m_LayerStack.PushLayer(layer);
+		layer->OnInit();
 	}
 
 	void Application::PushOverlay(Layer* layer)
 	{
 		m_LayerStack.PushOverlay(layer);
+		layer->OnInit();
 	}
 
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
 
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowCloseEvent>(DVS_BIND_EVENT_FN(Application::OnWindowClose));
 
 		for (std::vector<Layer*>::iterator it = m_LayerStack.end(); it != m_LayerStack.begin(); )
 		{

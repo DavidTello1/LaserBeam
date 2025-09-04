@@ -6,6 +6,7 @@
 #include "Davos/Events/MouseEvent.h"
 
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 namespace Davos {
 
@@ -51,6 +52,10 @@ namespace Davos {
 
 		m_Window = glfwCreateWindow((int)properties.width, (int)properties.height, m_Data.title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
+
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		DVS_CORE_ASSERT(status, "Failed to initialize Glad!");
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
@@ -98,6 +103,14 @@ namespace Davos {
 					break;
 				}
 			}
+		});
+
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int character)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			
+			KeyTypedEvent event(character);
+			data.eventCallback(event);
 		});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
