@@ -14,13 +14,21 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Davos/vendor/GLFW/include"
+IncludeDir["Glad"] = "Davos/vendor/Glad/include"
+IncludeDir["ImGui"] = "Davos/vendor/ImGui"
 
-include "Davos/vendor/GLFW"
+group "Dependencies"
+	include "Davos/vendor/GLFW"
+	include "Davos/vendor/Glad"
+	include "Davos/vendor/ImGui"
+
+group ""
 
 project "Davos"
 	location "Davos"
 	kind "SharedLib"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -38,25 +46,29 @@ project "Davos"
 	{
 		"Davos/src",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}"
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}"
 	}
 
 	links
 	{
 		"GLFW",
+		"Glad",
+		"ImGui",
 		"opengl32.lib"
 	}
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
 		systemversion "latest"
 		buildoptions "/utf-8"
 
 		defines
 		{
 			"DVS_PLATFORM_WINDOWS",
-			"DVS_BUILD_DLL"
+			"DVS_BUILD_DLL",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands
@@ -67,17 +79,17 @@ project "Davos"
 	
 	filter "configurations:Debug"
 		defines "DVS_DEBUG"
-		buildoptions "/MDd"
+		runtime "Debug"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "DVS_RELEASE"
-		buildoptions "/MD"
+		runtime "Release"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "DVS_DIST"
-		buildoptions "/MD"
+		runtime "Release"
 		optimize "On"
 
 
@@ -85,6 +97,7 @@ project "LaserBeam"
 	location "LaserBeam"
 	kind "ConsoleApp"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -108,7 +121,6 @@ project "LaserBeam"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
 		systemversion "latest"
 		buildoptions "/utf-8"
 
@@ -119,15 +131,15 @@ project "LaserBeam"
 	
 	filter "configurations:Debug"
 		defines "DVS_DEBUG"
-		buildoptions "/MDd"
+		runtime "Debug"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "DVS_RELEASE"
-		buildoptions "/MD"
+		runtime "Release"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "DVS_DIST"
-		buildoptions "/MD"
+		runtime "Release"
 		optimize "On"
