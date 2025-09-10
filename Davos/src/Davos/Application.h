@@ -1,11 +1,10 @@
 #pragma once
-#include "Core.h"
 #include "Window.h"
 #include "LayerStack.h"
-#include "ImGui/ImGuiLayer.h"
 
 namespace Davos {
 
+	class ImGuiLayer;
 	class Event;
 	class WindowCloseEvent;
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "Davos/Core.h"
 #include "Layer.h"
 
 namespace Davos {

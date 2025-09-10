@@ -1,6 +1,8 @@
 #include "dvs_pch.h"
 #include "Application.h"
 
+#include "ImGui/ImGuiLayer.h"
+
 #include "Davos/Events/Event.h"
 #include "Davos/Events/ApplicationEvent.h"
 
