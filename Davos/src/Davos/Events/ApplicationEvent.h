@@ -3,7 +3,7 @@
 
 namespace Davos {
 
-	class DAVOS_API WindowResizeEvent : public Event
+	class WindowResizeEvent : public Event
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height) : m_Width(width), m_Height(height) {}
@@ -25,7 +25,7 @@ namespace Davos {
 		unsigned int m_Width, m_Height;
 	};
 
-	class DAVOS_API WindowCloseEvent : public Event
+	class WindowCloseEvent : public Event
 	{
 	public:
 		WindowCloseEvent() {}
@@ -34,7 +34,7 @@ namespace Davos {
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class DAVOS_API AppTickEvent : public Event
+	class AppTickEvent : public Event
 	{
 	public:
 		AppTickEvent() {}
@@ -43,7 +43,7 @@ namespace Davos {
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class DAVOS_API AppUpdateEvent : public Event
+	class AppUpdateEvent : public Event
 	{
 	public:
 		AppUpdateEvent() {}
@@ -52,7 +52,7 @@ namespace Davos {
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class DAVOS_API AppRenderEvent : public Event
+	class AppRenderEvent : public Event
 	{
 	public:
 		AppRenderEvent() {}

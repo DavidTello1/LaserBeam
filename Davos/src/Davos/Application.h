@@ -2,13 +2,14 @@
 #include "Core.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "ImGui/ImGuiLayer.h"
 
 namespace Davos {
 
 	class Event;
 	class WindowCloseEvent;
 
-	class DAVOS_API Application
+	class Application
 	{
 	public:
 		Application();
@@ -31,6 +32,7 @@ namespace Davos {
 		bool m_isRunning = true;
 		std::unique_ptr<Window> m_Window;
 		LayerStack m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
 
 		static Application* s_Instance;
 	};

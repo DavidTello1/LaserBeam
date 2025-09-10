@@ -6,7 +6,7 @@
 
 namespace Davos {
 
-	class DAVOS_API Log
+	class Log
 	{
 	public:
 		static void Init();

@@ -5,12 +5,16 @@ class ExampleLayer : public Davos::Layer
 public:
 	ExampleLayer() : Layer("Example") {}
 
-	void OnUpdate() override {
+	void OnUpdate() override 
+	{
 		//DVS_INFO("ExampleLayer::Update");
+		//if (Davos::Input::IsKeyPressed(DVS_KEY_A))
+		//	DVS_TRACE("A Key is pressed!");
 	}
 
-	void OnEvent(Davos::Event& event) override {
-		DVS_TRACE("{0}", event);
+	void OnEvent(Davos::Event& event) override 
+	{
+		//DVS_TRACE("{0}", event);
 	}
 };
 
@@ -21,7 +25,6 @@ public:
 	LaserBeam() 
 	{
 		PushLayer(new ExampleLayer());
-		PushOverlay(new Davos::ImGuiLayer());
 	}
 
 	~LaserBeam() 

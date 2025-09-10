@@ -16,6 +16,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Davos/vendor/GLFW/include"
 IncludeDir["Glad"] = "Davos/vendor/Glad/include"
 IncludeDir["ImGui"] = "Davos/vendor/ImGui"
+IncludeDir["glm"] = "Davos/vendor/glm"
 
 group "Dependencies"
 	include "Davos/vendor/GLFW"
@@ -26,9 +27,10 @@ group ""
 
 project "Davos"
 	location "Davos"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -42,13 +44,20 @@ project "Davos"
 		"%{prj.name}/src/**.cpp"
 	}
 
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE"
+	}
+
 	includedirs
 	{
 		"Davos/src",
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
-		"%{IncludeDir.ImGui}"
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.glm}"
 	}
 
 	links
@@ -60,44 +69,36 @@ project "Davos"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 		buildoptions "/utf-8"
 
 		defines
 		{
-			"DVS_PLATFORM_WINDOWS",
-			"DVS_BUILD_DLL",
-			"GLFW_INCLUDE_NONE"
-		}
-
-		postbuildcommands
-		{
-			("{MKDIR} ../bin/" .. outputdir .. "/LaserBeam"),
-			("{COPYFILE} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/LaserBeam")
+			"DVS_PLATFORM_WINDOWS"
 		}
 	
 	filter "configurations:Debug"
 		defines "DVS_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "DVS_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "DVS_DIST"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 
 project "LaserBeam"
 	location "LaserBeam"
 	kind "ConsoleApp"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -111,7 +112,9 @@ project "LaserBeam"
 	includedirs
 	{
 		"Davos/src",
-		"Davos/vendor/spdlog/include"
+		"Davos/vendor",
+		"Davos/vendor/spdlog/include",
+		"%{IncludeDir.glm}"
 	}
 
 	links
@@ -120,7 +123,6 @@ project "LaserBeam"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 		buildoptions "/utf-8"
 
@@ -132,14 +134,14 @@ project "LaserBeam"
 	filter "configurations:Debug"
 		defines "DVS_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "DVS_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "DVS_DIST"
 		runtime "Release"
-		optimize "On"
+		optimize "on"

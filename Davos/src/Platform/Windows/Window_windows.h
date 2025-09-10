@@ -13,6 +13,8 @@ namespace Davos {
 
 		void OnUpdate() override;
 
+		inline void* GetNativeWindow() const override { return m_Window; }
+
 		inline unsigned int GetWidth() const override { return m_Data.width; }
 		inline unsigned int GetHeight() const override { return m_Data.height; }
 

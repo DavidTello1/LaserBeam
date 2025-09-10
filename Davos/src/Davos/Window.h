@@ -19,7 +19,7 @@ namespace Davos {
 	};
 
 	// Interface representing a desktop system based Window
-	class DAVOS_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
@@ -27,6 +27,8 @@ namespace Davos {
 		virtual ~Window() {}
 
 		virtual void OnUpdate() = 0;
+
+		virtual void* GetNativeWindow() const = 0;
 
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
