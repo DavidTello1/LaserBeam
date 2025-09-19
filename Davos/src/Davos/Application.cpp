@@ -1,12 +1,14 @@
 #include "dvs_pch.h"
 #include "Application.h"
 
+#include "Core/TimeStep.h"
+
 #include "ImGui/ImGuiLayer.h"
 
 #include "Davos/Events/Event.h"
 #include "Davos/Events/ApplicationEvent.h"
 
-//#include "Davos/Renderer/Renderer.h"
+#include <GLFW/glfw3.h> //*** should be in Platform::GetTime
 
 namespace Davos {
 
@@ -32,8 +34,12 @@ namespace Davos {
 	{
 		while (m_isRunning)
 		{
+			float time = (float)glfwGetTime();
+			TimeStep timeStep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+
 			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate();
+				layer->OnUpdate(timeStep);
 
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)

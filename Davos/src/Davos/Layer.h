@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/TimeStep.h"
 
 namespace Davos {
 
@@ -12,7 +13,7 @@ namespace Davos {
 
 		virtual void OnInit() {}
 		virtual void OnCleanUp() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(TimeStep dt) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
 

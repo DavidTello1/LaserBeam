@@ -29,6 +29,7 @@ namespace Davos {
 
 	private:
 		bool m_isRunning = true;
+		float m_LastFrameTime = 0.0f;
 
 		std::unique_ptr<Window> m_Window;
 

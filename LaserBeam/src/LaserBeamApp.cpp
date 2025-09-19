@@ -62,8 +62,10 @@ public:
 		m_Shader.reset(new Davos::Shader(vertexSource, fragmentSource));
 	}
 
-	void OnUpdate() override 
+	void OnUpdate(Davos::TimeStep dt) override 
 	{
+		DVS_TRACE("Delta time: {0} s ({1} ms)", dt.GetSeconds(), dt.GetMilliseconds());
+
 		//DVS_INFO("ExampleLayer::Update");
 		//if (Davos::Input::IsKeyPressed(DVS_KEY_A))
 		//	DVS_TRACE("A Key is pressed!");
@@ -81,7 +83,6 @@ public:
 
 	void OnEvent(Davos::Event& event) override 
 	{
-		//DVS_TRACE("{0}", event);
 	}
 
 private:
