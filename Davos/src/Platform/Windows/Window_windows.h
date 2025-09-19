@@ -5,6 +5,8 @@ struct GLFWwindow;
 
 namespace Davos {
 
+	class GraphicsContext;
+
 	class WindowWindows : public Window
 	{
 	public:
@@ -29,6 +31,7 @@ namespace Davos {
 
 	private:
 		GLFWwindow* m_Window;
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{
