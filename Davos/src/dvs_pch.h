@@ -7,11 +7,12 @@
 #include <functional>
 
 #include <string>
-#include <sstream> //*** should not be included in Dist versions
+#include <sstream>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Davos/Core.h"
 #include "Davos/Log.h"
 
 #ifdef DVS_PLATFORM_WINDOWS
