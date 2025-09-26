@@ -17,6 +17,7 @@ IncludeDir["GLFW"] = "Davos/vendor/GLFW/include"
 IncludeDir["Glad"] = "Davos/vendor/Glad/include"
 IncludeDir["ImGui"] = "Davos/vendor/ImGui"
 IncludeDir["glm"] = "Davos/vendor/glm"
+IncludeDir["stb"] = "Davos/vendor/stb"
 
 group "Dependencies"
 	include "Davos/vendor/GLFW"
@@ -57,7 +58,8 @@ project "Davos"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.stb}"
 	}
 
 	links
