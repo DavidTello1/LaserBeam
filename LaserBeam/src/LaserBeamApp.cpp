@@ -1,70 +1,44 @@
 #include <Davos.h>
 
+#include <memory>
+
 class ExampleLayer : public Davos::Layer
 {
 public:
 	ExampleLayer() : Layer("Example") 
 	{
-		m_VertexArray.reset(Davos::VertexArray::Create());
+		m_VertexArray = Davos::VertexArray::Create();
 
-		float vertices[3 * 7] = {
-			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.2f, 1.0f,
-			 0.5f, -0.5f, 0.0f, 0.2f, 0.8f, 0.2f, 1.0f,
-			 0.0f,  0.5f, 0.0f, 0.2f, 0.2f, 0.8f, 1.0f
+		float vertices[5 * 4] = {
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
-		std::shared_ptr<Davos::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(Davos::VertexBuffer::Create(vertices, sizeof(vertices)));
+		Davos::Ref<Davos::VertexBuffer> vertexBuffer;
+		vertexBuffer = Davos::VertexBuffer::Create(vertices, sizeof(vertices));
 		vertexBuffer->SetLayout({
 			{ Davos::ShaderDataType::FLOAT_3, "a_Position" },
-			{ Davos::ShaderDataType::FLOAT_4, "a_Color" }
+			{ Davos::ShaderDataType::FLOAT_2, "a_TexCoords" }
 			});
 
 		m_VertexArray->AddVertexBuffer(vertexBuffer);
 
-		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<Davos::IndexBuffer> indexBuffer;
-		indexBuffer.reset(Davos::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		uint32_t indices[6] = { 0, 1, 2, 0, 3, 2};
+		Davos::Ref<Davos::IndexBuffer> indexBuffer;
+		indexBuffer = Davos::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
-		std::string vertexSource = R"(
-			#version 330 core
-			
-			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) in vec4 a_Color;
-
-			out vec3 v_Position;
-			out vec4 v_Color;
-
-			void main()
-			{
-				v_Position = a_Position;
-				v_Color = a_Color;
-				gl_Position = vec4(a_Position, 1.0);
-			}
-		)";
-
-		std::string fragmentSource = R"(
-			#version 330 core
-			
-			layout(location = 0) out vec4 o_Color;
-
-			in vec3 v_Position;
-			in vec4 v_Color;
-
-			void main()
-			{
-				o_Color = vec4(v_Position * 0.5 + 0.5, 1.0);
-				o_Color = v_Color;
-			}
-		)";
-
-		m_Shader.reset(new Davos::Shader(vertexSource, fragmentSource));
+		m_Texture = Davos::Texture2D::Create("Assets/Textures/checkerboard.png");
+		m_Shader = Davos::Shader::Create("Assets/Shaders/Texture.glsl");
+		m_Shader->Bind();
+		m_Shader->SetInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Davos::TimeStep dt) override 
 	{
-		DVS_TRACE("Delta time: {0} s ({1} ms)", dt.GetSeconds(), dt.GetMilliseconds());
+		//DVS_TRACE("Delta time: {0} s ({1} ms)", dt.GetSeconds(), dt.GetMilliseconds());
 
 		//DVS_INFO("ExampleLayer::Update");
 		//if (Davos::Input::IsKeyPressed(DVS_KEY_A))
@@ -76,7 +50,8 @@ public:
 		Davos::Renderer::BeginScene();
 
 		m_Shader->Bind();
-		Davos::Renderer::Submit(m_VertexArray);
+		m_Texture->Bind();
+		Davos::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Davos::Renderer::EndScene();
 	}
@@ -86,8 +61,10 @@ public:
 	}
 
 private:
-	std::shared_ptr<Davos::Shader> m_Shader;
-	std::shared_ptr<Davos::VertexArray> m_VertexArray;
+	Davos::Ref<Davos::Shader> m_Shader;
+	Davos::Ref<Davos::VertexArray> m_VertexArray;
+
+	Davos::Ref<Davos::Texture> m_Texture;
 
 };
 
