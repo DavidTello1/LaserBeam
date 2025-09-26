@@ -7,40 +7,41 @@
 
 namespace Davos {
 
-	VertexBuffer* VertexBuffer::Create(size_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(size_t size)
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OPENGL:	return new OpenGLVertexBuffer(size);
+			case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
+			case RendererAPI::API::OPENGL:	return CreateRef<OpenGLVertexBuffer>(size);
 		}
 
-		DVS_CORE_ASSERT(false, "Unknown RendererAPI");
+		DVS_CORE_ASSERT(false, "Error creating VertexBuffer: unknown RendererAPI");
 		return nullptr;
 	}
 
-	VertexBuffer* VertexBuffer::Create(float* vertices, size_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, size_t size)
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OPENGL:	return new OpenGLVertexBuffer(vertices, size);
+		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
+		case RendererAPI::API::OPENGL:	return CreateRef<OpenGLVertexBuffer>(vertices, size);
 		}
 
-		DVS_CORE_ASSERT(false, "Unknown RendererAPI");
+		DVS_CORE_ASSERT(false, "Error creating VertexBuffer: unknown RendererAPI");
 		return nullptr;
 	}
 
 
-	IndexBuffer* IndexBuffer::Create(uint32_t* indices, uint32_t count)
+	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count)
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OPENGL:	return new OpenGLIndexBuffer(indices, count);
+		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
+		case RendererAPI::API::OPENGL:	return CreateRef<OpenGLIndexBuffer>(indices, count);
 		}
 
-		DVS_CORE_ASSERT(false, "Unknown RendererAPI");
+		DVS_CORE_ASSERT(false, "Error creating IndexBuffer: unknown RendererAPI");
 		return nullptr;
 	}
+
 }

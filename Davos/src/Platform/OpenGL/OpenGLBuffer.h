@@ -20,10 +20,9 @@ namespace Davos {
 		void SetLayout(const BufferLayout& layout) override { m_Layout = layout; }
 
 	private:
-		uint32_t m_RendererID;
+		uint32_t m_RenderID;
 		BufferLayout m_Layout;
 	};
-
 
 	// --- INDEX BUFFER ---
 	class OpenGLIndexBuffer : public IndexBuffer
@@ -38,7 +37,7 @@ namespace Davos {
 		uint32_t GetCount() const { return m_Count; }
 
 	private:
-		uint32_t m_RendererID;
+		uint32_t m_RenderID;
 		uint32_t m_Count;
 	};
 

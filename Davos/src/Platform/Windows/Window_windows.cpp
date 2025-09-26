@@ -5,35 +5,32 @@
 #include "Davos/Events/KeyEvent.h"
 #include "Davos/Events/MouseEvent.h"
 
+#include "Davos/Renderer/Renderer.h"
+
 #include "Platform/OpenGL/OpenGLContext.h"
 
 #include <GLFW/glfw3.h>
 
 namespace Davos {
 
-	static bool s_isGLFWInitialized = false;
+	static uint8_t s_GLFWWindowCount = 0;
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
 		DVS_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-	Window* Window::Create(const WindowProperties& properties)
-	{
-		return new WindowWindows(properties);
-	}
-
 	WindowWindows::WindowWindows(const WindowProperties& properties)
 	{
-		Init(properties);
+		_Init(properties);
 	}
 
 	WindowWindows::~WindowWindows()
 	{
-		CleanUp();
+		_CleanUp();
 	}
 
-	void WindowWindows::Init(const WindowProperties& properties)
+	void WindowWindows::_Init(const WindowProperties& properties)
 	{
 		m_Data.title = properties.title;
 		m_Data.width = properties.width;
@@ -41,19 +38,24 @@ namespace Davos {
 
 		DVS_CORE_INFO("Creating window {0} ({1}, {2})", properties.title, properties.width, properties.height);
 
-		if (!s_isGLFWInitialized)
+		if (s_GLFWWindowCount == 0)
 		{
-			//*** TODO: glfwTerminate on system shutdown
 			int success = glfwInit();
 			DVS_CORE_ASSERT(success, "Could  not initialize GLFW!");
-
 			glfwSetErrorCallback(GLFWErrorCallback);
-			s_isGLFWInitialized = true;
 		}
 
-		m_Window = glfwCreateWindow((int)properties.width, (int)properties.height, m_Data.title.c_str(), nullptr, nullptr);
+		{
+		#if defined(DVS_DEBUG)
+			if (Renderer::GetAPI() == RendererAPI::API::OPENGL)
+				glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+		#endif
 
-		m_Context = new OpenGLContext(m_Window);
+			m_Window = glfwCreateWindow((int)properties.width, (int)properties.height, m_Data.title.c_str(), nullptr, nullptr);
+			++s_GLFWWindowCount;
+		}
+
+		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
@@ -86,13 +88,13 @@ namespace Davos {
 			{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(key, 0);
+					KeyPressedEvent event(key, false);
 					data.eventCallback(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent event(key, 1);
+					KeyPressedEvent event(key, true);
 					data.eventCallback(event);
 					break;
 				}
@@ -151,9 +153,13 @@ namespace Davos {
 		});
 	}
 
-	void WindowWindows::CleanUp()
+	void WindowWindows::_CleanUp()
 	{
 		glfwDestroyWindow(m_Window);
+		--s_GLFWWindowCount;
+
+		if (s_GLFWWindowCount == 0)
+			glfwTerminate();
 	}
 
 	void WindowWindows::OnUpdate()

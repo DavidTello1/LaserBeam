@@ -1,5 +1,5 @@
 #pragma once
-#include "Davos/Window.h"
+#include "Davos/Core/Window.h"
 
 struct GLFWwindow;
 
@@ -26,12 +26,12 @@ namespace Davos {
 		bool IsVSync() const override;
 
 	private:
-		virtual void Init(const WindowProperties& properties);
-		virtual void CleanUp();
+		void _Init(const WindowProperties& properties);
+		void _CleanUp();
 
 	private:
 		GLFWwindow* m_Window;
-		GraphicsContext* m_Context;
+		Scope<GraphicsContext> m_Context;
 
 		struct WindowData
 		{

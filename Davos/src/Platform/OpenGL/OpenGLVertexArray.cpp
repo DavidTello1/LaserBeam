@@ -28,12 +28,12 @@ namespace Davos {
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		glCreateVertexArrays(1, &m_RendererID);
+		glCreateVertexArrays(1, &m_RenderID);
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
-		glBindVertexArray(m_RendererID);
+		glBindVertexArray(m_RenderID);
 	}
 
 	void OpenGLVertexArray::Unbind() const
@@ -41,11 +41,11 @@ namespace Davos {
 		glBindVertexArray(0);
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
+	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 	{
 		DVS_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
-		glBindVertexArray(m_RendererID);
+		glBindVertexArray(m_RenderID);
 		vertexBuffer->Bind();
 
 		uint32_t index = 0;
@@ -67,9 +67,9 @@ namespace Davos {
 		m_VertexBuffers.push_back(vertexBuffer);
 	}
 
-	void OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
+	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 	{
-		glBindVertexArray(m_RendererID);
+		glBindVertexArray(m_RenderID);
 		indexBuffer->Bind();
 
 		m_IndexBuffer = indexBuffer;

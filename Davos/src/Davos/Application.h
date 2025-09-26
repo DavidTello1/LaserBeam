@@ -1,6 +1,6 @@
 #pragma once
-#include "Window.h"
-#include "LayerStack.h"
+#include "Core/Window.h"
+#include "Core/LayerStack.h"
 
 namespace Davos {
 
@@ -31,7 +31,7 @@ namespace Davos {
 		bool m_isRunning = true;
 		float m_LastFrameTime = 0.0f;
 
-		std::unique_ptr<Window> m_Window;
+		Scope<Window> m_Window;
 
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
