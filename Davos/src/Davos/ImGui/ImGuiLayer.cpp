@@ -3,22 +3,18 @@
 
 #include "Davos/Application.h"
 
+#include "Davos/Events/Event.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
-
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 
-#include <GLFW/glfw3.h> //***
-//#include <glad/glad.h> //***
+#include <GLFW/glfw3.h>
 
 namespace Davos {
 
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer")
-	{
-	}
-
-	ImGuiLayer::~ImGuiLayer()
 	{
 	}
 
@@ -76,10 +72,6 @@ namespace Davos {
 		//}
 	}
 
-	void ImGuiLayer::OnImGuiRender()
-	{
-		static bool show = true;
-		ImGui::ShowDemoWindow(&show);
 	}
 
 	void ImGuiLayer::Begin()
