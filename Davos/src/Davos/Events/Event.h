@@ -1,5 +1,4 @@
 #pragma once
-#include "dvs_pch.h"
 
 namespace Davos {
 
@@ -47,26 +46,26 @@ namespace Davos {
 	};
 
 #define EVENT_CLASS_TYPE(type)\
-	static EventType GetStaticType() { return EventType::##type; }\
+	static EventType GetStaticType() { return EventType::type; }\
 	virtual EventType GetEventType() const override { return GetStaticType(); }\
 	virtual const char* GetName() const override { return #type; }
 
-#define EVENT_CLASS_CATEGORY(category)\
-	virtual int GetCategoryFlags() const override { return category; }
+#define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
 	class Event
 	{
-		friend class EventDispatcher;
-
 	public:
+		virtual ~Event() = default;
+
 		virtual EventType GetEventType() const = 0;
 		virtual int GetCategoryFlags() const = 0;
-		virtual const char* GetName() const = 0; // Debug Purposes (should not be used in Dist versions)
-		virtual std::string ToString() const { return GetName(); } // Debug Purposes (should not be used in Dist versions)
 
-		inline bool IsInCategory(EventCategory category) {
-			return GetCategoryFlags() & category;
-		}
+		// --- Debug Utils
+		virtual const char* GetName() const = 0;
+		virtual std::string ToString() const { return GetName(); }
+		// ---
+
+		inline bool IsInCategory(EventCategory category) const { return GetCategoryFlags() & category; }
 
 	public:
 		bool isHandled = false;
@@ -74,21 +73,18 @@ namespace Davos {
 
 	class EventDispatcher
 	{
-		template<typename T>
-		using EventFn = std::function<bool(T&)>;
-
 	public:
 		EventDispatcher(Event& event) : m_Event(event) {};
 
-		template<typename T>
-		bool Dispatch(EventFn<T> func)
+		// F will be deduced by the compiler
+		template<typename T, typename F>
+		bool Dispatch(const F& func)
 		{
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
-				m_Event.isHandled = func(*(T*)&m_Event);
+				m_Event.isHandled |= func(static_cast<T&>(m_Event));
 				return true;
 			}
-
 			return false;
 		}
 

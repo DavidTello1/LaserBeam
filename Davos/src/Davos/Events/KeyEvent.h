@@ -1,6 +1,8 @@
 #pragma once
 #include "Event.h"
 
+#include "Davos/Core/KeyCodes.h"
+
 namespace Davos {
 
 	class KeyEvent : public Event
@@ -14,7 +16,7 @@ namespace Davos {
 		KeyEvent(int keycode) : m_KeyCode(keycode) {}
 
 	protected:
-		int m_KeyCode;
+		KeyCode m_KeyCode;
 	};
 
 	// --------------------------------
@@ -22,28 +24,28 @@ namespace Davos {
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(int keycode, int repeatCount) : KeyEvent(keycode), m_RepeatCount(repeatCount) {}
+		KeyPressedEvent(const KeyCode keycode, bool isRepeat = false) : KeyEvent(keycode), m_isRepeat(isRepeat) {}
 
-		inline int GetRepeatCount() const { return m_RepeatCount; }
+		inline bool IsRepeat() const { return m_isRepeat; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyPressedEvent: " << m_KeyCode << " (" << m_RepeatCount << " repeats)";
+			ss << "KeyPressedEvent: " << m_KeyCode << " (repeat = " << m_isRepeat << ")";
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(KeyPressed)
 
 	private:
-		int m_RepeatCount;
+		bool m_isRepeat;
 	};
 
 	// ---
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(int keycode) : KeyEvent(keycode) {}
+		KeyReleasedEvent(const KeyCode keycode) : KeyEvent(keycode) {}
 
 		std::string ToString() const override
 		{
@@ -58,7 +60,7 @@ namespace Davos {
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(int keycode) : KeyEvent(keycode) {}
+		KeyTypedEvent(const KeyCode keycode) : KeyEvent(keycode) {}
 
 		std::string ToString() const override
 		{
