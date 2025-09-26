@@ -6,6 +6,8 @@ extern Davos::Application* Davos::CreateApplication();
 
 int main(int argc, char** argv)
 {
+	Davos::Log::Init();
+
 	Davos::Application* app = Davos::CreateApplication();
 	app->Run();
 	delete app;

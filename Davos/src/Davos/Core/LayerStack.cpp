@@ -3,10 +3,6 @@
 
 namespace Davos {
 
-	LayerStack::LayerStack()
-	{
-	}
-
 	LayerStack::~LayerStack()
 	{
 		for (Layer* layer : m_Layers)
@@ -30,7 +26,7 @@ namespace Davos {
 	void LayerStack::PopLayer(Layer* layer)
 	{
 		std::vector<Layer*>::iterator it = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerCount, layer);
-		if (it != m_Layers.end())
+		if (it != m_Layers.begin() + m_LayerCount)
 		{
 			layer->OnCleanUp();
 

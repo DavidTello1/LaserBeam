@@ -1,7 +1,8 @@
 #pragma once
-#include "Davos/Events/Event.h"
 
 namespace Davos {
+
+	class Event;
 
 	struct WindowProperties
 	{
@@ -23,7 +24,7 @@ namespace Davos {
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
-		virtual ~Window() {}
+		virtual ~Window() = default;
 
 		virtual void OnUpdate() = 0;
 
@@ -37,7 +38,7 @@ namespace Davos {
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;
 
-		static Window* Create(const WindowProperties& properties = WindowProperties());
+		static Scope<Window> Create(const WindowProperties& properties = WindowProperties());
 	};
 
 }
