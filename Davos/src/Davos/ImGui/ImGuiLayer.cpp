@@ -64,14 +64,12 @@ namespace Davos {
 
 	void ImGuiLayer::OnEvent(Event& e)
 	{
-		//if (m_BlockEvents)
-		//{
-		//	ImGuiIO& io = ImGui::GetIO();
-		//	e.isHandled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
-		//	e.isHandled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
-		//}
-	}
-
+		if (m_isBlockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			e.isHandled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+			e.isHandled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
 	}
 
 	void ImGuiLayer::Begin()
@@ -100,5 +98,10 @@ namespace Davos {
 			glfwMakeContextCurrent(backup_current_context);
 		}
 	}
+
+	//uint32_t ImGuiLayer::GetActiveWidgetID() const
+	//{
+	//	return GImGui->ActiveId;
+	//}
 
 }
