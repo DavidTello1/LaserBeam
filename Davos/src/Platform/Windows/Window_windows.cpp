@@ -88,19 +88,19 @@ namespace Davos {
 			{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(key, false);
+					KeyPressEvent event(key, false);
 					data.eventCallback(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent event(key, true);
+					KeyPressEvent event(key, true);
 					data.eventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent event(key);
+					KeyReleaseEvent event(key);
 					data.eventCallback(event);
 					break;
 				}
@@ -111,7 +111,7 @@ namespace Davos {
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			
-			KeyTypedEvent event(character);
+			KeyTypeEvent event(character);
 			data.eventCallback(event);
 		});
 
@@ -123,13 +123,13 @@ namespace Davos {
 			{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent event(button);
+					MouseButtonPressEvent event(button);
 					data.eventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent event(button);
+					MouseButtonReleaseEvent event(button);
 					data.eventCallback(event);
 					break;
 				}
@@ -140,7 +140,7 @@ namespace Davos {
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			
-			MouseScrolledEvent event((float)xOffset, (float)yOffset);
+			MouseScrollEvent event((float)xOffset, (float)yOffset);
 			data.eventCallback(event);
 		});
 
@@ -148,7 +148,7 @@ namespace Davos {
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			
-			MouseMovedEvent event((float)xPos, (float)yPos);
+			MouseMoveEvent event((float)xPos, (float)yPos);
 			data.eventCallback(event);
 		});
 	}

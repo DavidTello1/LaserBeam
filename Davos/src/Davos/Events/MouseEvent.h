@@ -5,10 +5,10 @@
 
 namespace Davos {
 
-	class MouseMovedEvent : public Event
+	class MouseMoveEvent : public Event
 	{
 	public:
-		MouseMovedEvent(const float x, const float y) : m_MouseX(x), m_MouseY(y) {}
+		MouseMoveEvent(const float x, const float y) : m_MouseX(x), m_MouseY(y) {}
 
 		inline float GetX() const { return m_MouseX; }
 		inline float GetY() const { return m_MouseY; }
@@ -16,21 +16,21 @@ namespace Davos {
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseMovedEvent: " << m_MouseX << ", " << m_MouseY;
+			ss << "MouseMoveEvent: " << m_MouseX << ", " << m_MouseY;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseMoved)
+		EVENT_CLASS_TYPE(MouseMove)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
 		float m_MouseX, m_MouseY;
 	};
 
-	class MouseScrolledEvent : public Event
+	class MouseScrollEvent : public Event
 	{
 	public:
-		MouseScrolledEvent(float xOffset, float yOffset) : m_XOffset(xOffset), m_YOffset(yOffset) {}
+		MouseScrollEvent(float xOffset, float yOffset) : m_XOffset(xOffset), m_YOffset(yOffset) {}
 
 		inline float GetXOffset() const { return m_XOffset; }
 		inline float GetYOffset() const { return m_YOffset; }
@@ -38,11 +38,11 @@ namespace Davos {
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseScrolledEvent: " << m_XOffset << ", " << m_YOffset;
+			ss << "MouseScrollEvent: " << m_XOffset << ", " << m_YOffset;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseScrolled)
+		EVENT_CLASS_TYPE(MouseScroll)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
@@ -66,34 +66,34 @@ namespace Davos {
 	};
 
 	// ---
-	class MouseButtonPressedEvent : public MouseButtonEvent
+	class MouseButtonPressEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(const MouseCode button) : MouseButtonEvent(button) {}
+		MouseButtonPressEvent(const MouseCode button) : MouseButtonEvent(button) {}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonPressed: " << m_Button;
+			ss << "MouseButtonPress: " << m_Button;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonPressed)
+		EVENT_CLASS_TYPE(MouseButtonPress)
 	};
 
-	class MouseButtonReleasedEvent : public MouseButtonEvent
+	class MouseButtonReleaseEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(const MouseCode button) : MouseButtonEvent(button) {}
+		MouseButtonReleaseEvent(const MouseCode button) : MouseButtonEvent(button) {}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonReleased: " << m_Button;
+			ss << "MouseButtonRelease: " << m_Button;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonReleased)
+		EVENT_CLASS_TYPE(MouseButtonRelease)
 	};
 
 }

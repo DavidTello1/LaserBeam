@@ -16,7 +16,7 @@ namespace Davos {
 		WindowResize,
 		WindowFocus,
 		WindowLostFocus,
-		WindowMoved,
+		WindowMove,
 
 		// App Events
 		AppTick,
@@ -24,15 +24,15 @@ namespace Davos {
 		AppRender,
 
 		// Key Events
-		KeyPressed,
-		KeyReleased,
-		KeyTyped,
+		KeyPress,
+		KeyRelease,
+		KeyType,
 
 		// Mouse Events
-		MouseMoved,
-		MouseScrolled,
-		MouseButtonPressed,
-		MouseButtonReleased,
+		MouseMove,
+		MouseScroll,
+		MouseButtonPress,
+		MouseButtonRelease,
 	};
 
 	enum EventCategory

@@ -21,55 +21,55 @@ namespace Davos {
 
 	// --------------------------------
 	// ---
-	class KeyPressedEvent : public KeyEvent
+	class KeyPressEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(const KeyCode keycode, bool isRepeat = false) : KeyEvent(keycode), m_isRepeat(isRepeat) {}
+		KeyPressEvent(const KeyCode keycode, bool isRepeat = false) : KeyEvent(keycode), m_isRepeat(isRepeat) {}
 
 		inline bool IsRepeat() const { return m_isRepeat; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyPressedEvent: " << m_KeyCode << " (repeat = " << m_isRepeat << ")";
+			ss << "KeyPressEvent: " << m_KeyCode << " (repeat = " << m_isRepeat << ")";
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyPressed)
+		EVENT_CLASS_TYPE(KeyPress)
 
 	private:
 		bool m_isRepeat;
 	};
 
 	// ---
-	class KeyReleasedEvent : public KeyEvent
+	class KeyReleaseEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(const KeyCode keycode) : KeyEvent(keycode) {}
+		KeyReleaseEvent(const KeyCode keycode) : KeyEvent(keycode) {}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyReleasedEvent: " << m_KeyCode;
+			ss << "KeyReleaseEvent: " << m_KeyCode;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyReleased)
+		EVENT_CLASS_TYPE(KeyRelease)
 	};
 
-	class KeyTypedEvent : public KeyEvent
+	class KeyTypeEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(const KeyCode keycode) : KeyEvent(keycode) {}
+		KeyTypeEvent(const KeyCode keycode) : KeyEvent(keycode) {}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyTypedEvent: " << m_KeyCode;
+			ss << "KeyTypeEvent: " << m_KeyCode;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyTyped)
+		EVENT_CLASS_TYPE(KeyType)
 	};
 
 }
