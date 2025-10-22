@@ -7,6 +7,7 @@ namespace Davos {
 	class ImGuiLayer;
 	class Event;
 	class WindowCloseEvent;
+	class WindowResizeEvent;
 
 	class Application
 	{
@@ -26,9 +27,12 @@ namespace Davos {
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
 		bool m_isRunning = true;
+		bool m_isMinimized = false;
+
 		float m_LastFrameTime = 0.0f;
 
 		Scope<Window> m_Window;

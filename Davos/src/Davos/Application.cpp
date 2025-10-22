@@ -43,13 +43,16 @@ namespace Davos {
 			TimeStep timeStep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate(timeStep);
+			if (!m_isMinimized)
+			{
+				for (Layer* layer : m_LayerStack)
+					layer->OnUpdate(timeStep);
 
-			m_ImGuiLayer->Begin();
-			for (Layer* layer : m_LayerStack)
-				layer->OnImGuiRender();
-			m_ImGuiLayer->End();
+				m_ImGuiLayer->Begin();
+				for (Layer* layer : m_LayerStack)
+					layer->OnImGuiRender();
+				m_ImGuiLayer->End();
+			}
 
 			m_Window->OnUpdate();
 		}
@@ -72,6 +75,7 @@ namespace Davos {
 		EventDispatcher dispatcher(e);
 
 		dispatcher.Dispatch<WindowCloseEvent>(DVS_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(DVS_BIND_EVENT_FN(Application::OnWindowResize));
 
 		for (std::vector<Layer*>::const_reverse_iterator it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
@@ -86,6 +90,20 @@ namespace Davos {
 	{
 		m_isRunning = false;
 		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_isMinimized = true;
+			return false;
+		}
+
+		m_isMinimized = false;
+		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+
+		return false;
 	}
 
 }
