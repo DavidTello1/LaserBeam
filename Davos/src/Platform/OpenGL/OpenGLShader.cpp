@@ -18,25 +18,40 @@ namespace Davos {
 			DVS_CORE_ASSERT(false, "Unknown shader type");
 			return 0;
 		}
+
+		static std::string GetNameFromFilePath(const std::string& filepath)
+		{
+			size_t lastSlash = filepath.find_last_of("/\\");
+			lastSlash = (lastSlash == std::string::npos) ? 0 : lastSlash + 1;
+
+			size_t lastDot = filepath.rfind('.');
+			size_t count = (lastDot == std::string::npos) ? filepath.size() - lastSlash : lastDot - lastSlash;
+
+			return (filepath.substr(lastSlash, count));
+		}
 	
 	}
 
 	// --------------------------------------------------
 	OpenGLShader::OpenGLShader(const std::string& filepath)
-		: m_FilePath(filepath)
 	{
 		std::string file = _ReadFile(filepath);
 		std::unordered_map<unsigned int, std::string> sources = _GetSourcesFromFile(file);
 		_Compile(sources);
+
+		m_Name = Utils::GetNameFromFilePath(filepath);
+		m_FilePath = filepath;
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource)
-		: m_Name(name)
 	{
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSource;
 		sources[GL_FRAGMENT_SHADER] = fragmentSource;
 		_Compile(sources);
+
+		m_Name = name;
+		m_FilePath = "";
 	}
 
 	OpenGLShader::~OpenGLShader()
