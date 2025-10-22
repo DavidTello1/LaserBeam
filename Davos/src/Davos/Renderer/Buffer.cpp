@@ -44,4 +44,16 @@ namespace Davos {
 		return nullptr;
 	}
 
+	Ref<UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
+		case RendererAPI::API::OPENGL:	return CreateRef<OpenGLUniformBuffer>(size, binding);
+		}
+
+		DVS_CORE_ASSERT(false, "Error creating UniformBuffer: unknown RendererAPI");
+		return nullptr;
+	}
+
 }

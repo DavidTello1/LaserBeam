@@ -68,4 +68,23 @@ namespace Davos {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
+	// --------------------------------------------------
+	// --- UNIFORM BUFFER ---
+	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size, uint32_t binding)
+	{
+		glCreateBuffers(1, &m_RenderID);
+		glNamedBufferData(m_RenderID, size, nullptr, GL_DYNAMIC_DRAW); //*** TODO: investigate usage hint
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding, m_RenderID);
+	}
+
+	OpenGLUniformBuffer::~OpenGLUniformBuffer()
+	{
+		glDeleteBuffers(1, &m_RenderID);
+	}
+
+	void OpenGLUniformBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
+	{
+		glNamedBufferSubData(m_RenderID, offset, size, data);
+	}
+
 }
