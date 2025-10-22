@@ -25,8 +25,7 @@
 #include "Davos/Renderer/VertexArray.h"
 #include "Davos/Renderer/Shader.h"
 #include "Davos/Renderer/Texture.h"
-// ---
 
-// --- Entry Point ---
-#include "Davos/Core/EntryPoint.h"
+#include "Davos/Renderer/OrthographicCamera.h"
+#include "Davos/Editor/OrthographicCameraController.h"
 // ---
