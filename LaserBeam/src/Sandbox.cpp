@@ -31,39 +31,38 @@ void Sandbox::OnUpdate(Davos::TimeStep dt)
 		Davos::Renderer::SetLineWidth(m_LineWidth);
 	}
 
-	{
-		// Renderer Draw
-		// ---
-		static float rotation = 0.0f;
-		rotation += m_RectRotationSpeed * dt;
-		if (rotation >= 360.0f)
-			rotation = 0.0f;
+	//{
+	//	// Renderer Draw
+	//	// ---
+	//	static float rotation = 0.0f;
+	//	rotation += m_RectRotationSpeed * dt;
+	//	if (rotation >= 360.0f)
+	//		rotation = 0.0f;
 
-		Davos::Renderer::BeginScene(m_CameraController.GetCamera());
+	//	Davos::Renderer::BeginScene(m_CameraController.GetCamera());
 
-		Davos::Renderer::DrawRectFilled({ 0.0f, 0.0f, 1.0f }, rotation, { 1.0f, 1.0f }, m_RectBackgroundColor, m_RectBorderColor);
-		Davos::Renderer::DrawRect({ -2.05f, 0.25f, 1.0f }, 0.0f, { 1.0f, 1.0f }, m_RectBorderColor);
+	//	Davos::Renderer::DrawRectFilled({ 0.0f, 0.0f, 1.0f }, rotation, { 1.0f, 1.0f }, m_RectBackgroundColor, m_RectBorderColor);
+	//	Davos::Renderer::DrawRect({ -2.05f, 0.25f, 1.0f }, 0.0f, { 1.0f, 1.0f }, m_RectBorderColor);
 
-		Davos::Renderer::DrawSprite({ 2.0f, 0.0f, 0.0f }, m_SpriteRotation, { 0.8f, 0.8f }, m_Texture, { 0.2f, 0.3f, 0.8f, 0.5f });
-		Davos::Renderer::DrawSprite({ 0.0f, 0.0f, 0.0f }, 0.0f, { 4.0f, 4.0f }, m_Texture, glm::vec4(1.0f), 10.0f);
+	//	Davos::Renderer::DrawSprite({ 2.0f, 0.0f, 1.0f }, m_SpriteRotation, { 0.8f, 0.8f }, m_Texture, { 0.2f, 0.3f, 0.8f, 0.5f });
+	//	Davos::Renderer::DrawSprite({ 0.0f, 0.0f, 0.5f }, 0.0f, { 4.0f, 4.0f }, m_Texture, glm::vec4(1.0f), 10.0f);
 
+	//	Davos::Renderer::EndScene();
 
-		Davos::Renderer::EndScene();
+	//	// ---
+	//	Davos::Renderer::BeginScene(m_CameraController.GetCamera());
 
-		// ---
-		Davos::Renderer::BeginScene(m_CameraController.GetCamera());
+	//	for (float y = -5.0f; y < 5.0f; y += 0.5f)
+	//	{
+	//		for (float x = -5.0f; x < 5.0f; x += 0.5f)
+	//		{
+	//			glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
+	//			Davos::Renderer::DrawRectFilled({ x, y, 0.0f }, 0.0f, { 0.45f, 0.45f }, color);
+	//		}
+	//	}
 
-		for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		{
-			for (float x = -5.0f; x < 5.0f; x += 0.5f)
-			{
-				glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
-				Davos::Renderer::DrawRectFilled({ x, y, 0.0f }, 0.0f, { 0.45f, 0.45f }, color);
-			}
-		}
-
-		Davos::Renderer::EndScene();
-	}
+	//	Davos::Renderer::EndScene();
+	//}
 }
 
 void Sandbox::OnImGuiRender()

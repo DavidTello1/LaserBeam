@@ -6,18 +6,19 @@
 class LaserBeam : public Davos::Application
 {
 public:
-	LaserBeam() 
+	LaserBeam(const Davos::AppSpecs& specs) : Davos::Application(specs)
 	{
 		PushLayer(new Sandbox());
 	}
-
-	~LaserBeam() 
-	{
-	}
 };
 
-// ----------------------------------
-Davos::Application* Davos::CreateApplication()
+// -----------------------------------------------
+Davos::Application* Davos::CreateApplication(Davos::AppCommandLineArgs args)
 {
-	return new LaserBeam();
+	AppSpecs specs;
+	specs.name = "Sandbox";
+	specs.workingDir = "../DavosEditor";
+	specs.commandLineArgs = args;
+
+	return new LaserBeam(specs);
 }

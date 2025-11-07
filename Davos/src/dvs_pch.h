@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Davos/Core/Core.h"
-#include "Davos/Core/Log.h"
-
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -15,6 +12,10 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "Davos/Core/Core.h"
+#include "Davos/Core/Log.h"
+//#include "Davos/Debug/Instrumentor.h"
 
 #ifdef DVS_PLATFORM_WINDOWS
 	#include <Windows.h>

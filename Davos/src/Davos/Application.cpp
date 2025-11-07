@@ -16,12 +16,16 @@ namespace Davos {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application()
+	Application::Application(const AppSpecs& specs) : m_Specs(specs)
 	{
 		DVS_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
-		m_Window = Window::Create();
+		//// Set Working Directory
+		//if (!m_Specs.workingDir.empty())
+		//	std::filesystem::current_path(m_Specs.workingDir);
+
+		m_Window = Window::Create(WindowProps(m_Specs.name));
 		m_Window->SetEventCallback(DVS_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
@@ -32,6 +36,7 @@ namespace Davos {
 
 	Application::~Application()
 	{
+		Renderer::CleanUp();
 	}
 
 	void Application::Run()
@@ -70,6 +75,11 @@ namespace Davos {
 		layer->OnInit();
 	}
 
+	void Application::Close()
+	{
+		m_isRunning = false;
+	}
+
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
@@ -88,7 +98,7 @@ namespace Davos {
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
-		m_isRunning = false;
+		Close();
 		return true;
 	}
 

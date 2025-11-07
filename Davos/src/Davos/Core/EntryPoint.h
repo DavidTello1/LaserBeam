@@ -2,17 +2,17 @@
 
 #ifdef DVS_PLATFORM_WINDOWS
 
-extern Davos::Application* Davos::CreateApplication();
+extern Davos::Application* Davos::CreateApplication(AppCommandLineArgs args);
 
 int main(int argc, char** argv)
 {
 	Davos::Log::Init();
 
-	Davos::Application* app = Davos::CreateApplication();
-	app->Run();
-	delete app;
+	Davos::Application* app = Davos::CreateApplication({ argc, argv });
 
-	return 0;
+	app->Run();
+	
+	delete app;
 }
 
 #endif
