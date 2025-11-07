@@ -85,10 +85,27 @@ namespace Davos {
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
+	void Renderer::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		s_Data.cameraBuffer.viewProjection = camera.GetProjectionMatrix() * glm::inverse(transform);
+		s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
+
+		StartBatch();
+	}
+
 	void Renderer::BeginScene(const Camera& camera)
 	{
 		s_Data.cameraBuffer.viewProjection = camera.GetViewProjectionMatrix();
 		s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
+
+		StartBatch();
+	}
+
+
+	void Renderer::BeginScene(/*const EditorCamera& camera*/)
+	{
+		//s_Data.cameraBuffer.viewProjection = camera.GetViewProjectionMatrix();
+		//s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
 
 		StartBatch();
 	}
@@ -182,15 +199,28 @@ namespace Davos {
 
 	void Renderer::DrawRectFilled(const glm::vec3& position, float rotation, const glm::vec2& size, const glm::vec4& backgroundColor, const glm::vec4& borderColor)
 	{
-		constexpr size_t QuadVertexCount = 4;
-		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-		const float textureIndex = 0.0f; // White Texture
-		const float tilingFactor = 1.0f;
+		DrawQuad(position, rotation, size, backgroundColor);
 
+		if (borderColor.a > 0.0f)
+			DrawRect(position, rotation, size, borderColor);
+	}
+
+	void Renderer::DrawQuad(const glm::vec3& position, float rotation, const glm::vec2& size, const glm::vec4& color)
+	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 		if (rotation != 0.0f)
 			transform *= glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
 		transform *= glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawQuad(transform, color);
+	}
+
+	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+	{
+		constexpr size_t QuadVertexCount = 4;
+		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		const float textureIndex = 0.0f; // White Texture
+		const float tilingFactor = 1.0f;
 
 		if (s_Data.Quad.GetIndexCount() >= RendererData::MaxIndices)
 			NextBatch();
@@ -199,7 +229,7 @@ namespace Davos {
 		{
 			s_Data.Quad.SetVertex(
 				transform * s_Data.quadVertexPositions[i],
-				backgroundColor,
+				color,
 				textureCoords[i],
 				textureIndex,
 				tilingFactor
@@ -208,23 +238,23 @@ namespace Davos {
 
 		s_Data.Quad.Add();
 
-		if (borderColor.a > 0.0f)
-		{
-			DrawRect(position, rotation, size, borderColor);
-		}
-
 		s_Data.stats.quadCount++;
 	}
 
 	void Renderer::DrawSprite(const glm::vec3& position, float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
-		constexpr size_t QuadVertexCount = 4;
-		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 		if (rotation != 0.0f)
 			transform *= glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
 		transform *= glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawSprite(transform, texture, tintColor, tilingFactor);
+	}
+
+	void Renderer::DrawSprite(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	{
+		constexpr size_t QuadVertexCount = 4;
+		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
 		if (s_Data.Quad.GetIndexCount() >= RendererData::MaxIndices)
 			NextBatch();
