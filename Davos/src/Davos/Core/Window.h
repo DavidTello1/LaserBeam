@@ -4,15 +4,15 @@ namespace Davos {
 
 	class Event;
 
-	struct WindowProperties
+	struct WindowProps
 	{
 		std::string title;
-		unsigned int width;
-		unsigned int height;
+		uint32_t width;
+		uint32_t height;
 
-		WindowProperties(const std::string& title = "Davos Engine",
-				unsigned int width = 1280,
-				unsigned int height = 720)
+		WindowProps(const std::string& title = "Davos Engine",
+				uint32_t width = 1280,
+				uint32_t height = 720)
 			: title(title), width(width), height(height)
 		{
 		}
@@ -30,15 +30,15 @@ namespace Davos {
 
 		virtual void* GetNativeWindow() const = 0;
 
-		virtual unsigned int GetWidth() const = 0;
-		virtual unsigned int GetHeight() const = 0;
+		virtual uint32_t GetWidth() const = 0;
+		virtual uint32_t GetHeight() const = 0;
 
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;
 
-		static Scope<Window> Create(const WindowProperties& properties = WindowProperties());
+		static Scope<Window> Create(const WindowProps& properties = WindowProps());
 	};
 
 }

@@ -10,15 +10,15 @@ namespace Davos {
 	class WindowWindows : public Window
 	{
 	public:
-		WindowWindows(const WindowProperties& properties);
+		WindowWindows(const WindowProps& properties);
 		virtual ~WindowWindows();
 
 		void OnUpdate() override;
 
 		inline void* GetNativeWindow() const override { return m_Window; }
 
-		inline unsigned int GetWidth() const override { return m_Data.width; }
-		inline unsigned int GetHeight() const override { return m_Data.height; }
+		inline uint32_t GetWidth() const override { return m_Data.width; }
+		inline uint32_t GetHeight() const override { return m_Data.height; }
 
 		// Window attributes
 		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.eventCallback = callback; }
@@ -26,7 +26,7 @@ namespace Davos {
 		bool IsVSync() const override;
 
 	private:
-		void _Init(const WindowProperties& properties);
+		void _Init(const WindowProps& properties);
 		void _CleanUp();
 
 	private:
@@ -36,7 +36,7 @@ namespace Davos {
 		struct WindowData
 		{
 			std::string title;
-			unsigned int width, height;
+			uint32_t width, height;
 			bool isVSync;
 			
 			EventCallbackFn eventCallback;

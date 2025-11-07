@@ -20,7 +20,7 @@ namespace Davos {
 		DVS_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-	WindowWindows::WindowWindows(const WindowProperties& properties)
+	WindowWindows::WindowWindows(const WindowProps& properties)
 	{
 		_Init(properties);
 	}
@@ -30,7 +30,7 @@ namespace Davos {
 		_CleanUp();
 	}
 
-	void WindowWindows::_Init(const WindowProperties& properties)
+	void WindowWindows::_Init(const WindowProps& properties)
 	{
 		m_Data.title = properties.title;
 		m_Data.width = properties.width;

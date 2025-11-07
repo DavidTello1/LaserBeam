@@ -23,8 +23,8 @@ namespace Davos {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
-		case RendererAPI::API::OPENGL:	return CreateRef<OpenGLVertexBuffer>(vertices, size);
+			case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
+			case RendererAPI::API::OPENGL:	return CreateRef<OpenGLVertexBuffer>(vertices, size);
 		}
 
 		DVS_CORE_ASSERT(false, "Error creating VertexBuffer: unknown RendererAPI");
@@ -36,8 +36,8 @@ namespace Davos {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
-		case RendererAPI::API::OPENGL:	return CreateRef<OpenGLIndexBuffer>(indices, count);
+			case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
+			case RendererAPI::API::OPENGL:	return CreateRef<OpenGLIndexBuffer>(indices, count);
 		}
 
 		DVS_CORE_ASSERT(false, "Error creating IndexBuffer: unknown RendererAPI");
@@ -48,8 +48,8 @@ namespace Davos {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
-		case RendererAPI::API::OPENGL:	return CreateRef<OpenGLUniformBuffer>(size, binding);
+			case RendererAPI::API::NONE:	DVS_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported"); return nullptr;
+			case RendererAPI::API::OPENGL:	return CreateRef<OpenGLUniformBuffer>(size, binding);
 		}
 
 		DVS_CORE_ASSERT(false, "Error creating UniformBuffer: unknown RendererAPI");

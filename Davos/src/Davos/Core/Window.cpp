@@ -7,7 +7,7 @@
 
 namespace Davos {
 
-	Scope<Window> Window::Create(const WindowProperties& properties)
+	Scope<Window> Window::Create(const WindowProps& properties)
 	{
 	#ifdef DVS_PLATFORM_WINDOWS
 		return CreateScope<WindowWindows>(properties);
