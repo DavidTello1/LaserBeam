@@ -43,6 +43,8 @@ namespace Davos {
 
 		void Close();
 
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+
 		Window& GetWindow() { return *m_Window; }
 		const AppSpecs& GetSpecs() const { return m_Specs; }
 

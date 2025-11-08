@@ -1,6 +1,8 @@
 #pragma once
 #include <Davos.h>
 
+#include "Panels/PanelViewport.h"
+
 namespace Davos {
 
 	class EditorLayer : public Layer
@@ -18,16 +20,22 @@ namespace Davos {
 		void OnEvent(Event& e) override;
 
 	private:
-		//Ref<Framebuffer> m_Framebuffer;
+		void _Dockspace();
 
+	private:
 		Ref<Scene> m_EditorScene;
 		Ref<Scene> m_ActiveScene;
 
+		// Panels
+		PanelViewport m_PanelViewport;
+
 		OrthographicCameraController m_CameraController;
 		UUID m_Camera;
-		UUID m_Square;
 
+		// -------------------------------------------------
 		//*** Debug
+		UUID m_Square, m_Sprite, m_RotatingSquare;
+
 		float m_SpriteRotation = 30.0f;
 		float m_RectRotationSpeed = 10.0f;
 		//std::string text = "Default Text";
