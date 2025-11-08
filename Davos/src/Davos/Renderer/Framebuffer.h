@@ -11,34 +11,47 @@ namespace Davos {
 		DEPTH = DEPTH24STENCIL8 // Defaults
 	};
 
-	enum class FB_TextureFilter //***
+	enum class FB_TextureFilterMin
 	{
 		NONE = 0,
+		NEAREST,
 		LINEAR,
-		REPEAT
+		NEAREST_MIPMAP_NEAREST,
+		NEAREST_MIPMAP_LINEAR,
+		LINEAR_MIPMAP_NEAREST,
+		LINEAR_MIPMAP_LINEAR
 	};
 
-	enum class FB_TextureWrap //***
+	enum class FB_TextureFilterMag
 	{
 		NONE = 0,
-		LINEAR,
-		REPEAT
+		NEAREST,
+		LINEAR
+	};
+
+	enum class FB_TextureWrap
+	{
+		NONE = 0,
+		REPEAT,
+		MIRRORED_REPEAT,
+		CLAMP_TO_EDGE,
+		CLAMP_TO_BORDER
 	};
 
 	struct FB_TextureSpecs
 	{
 		FB_TextureSpecs() = default;
-		FB_TextureSpecs(FB_TextureFormat format, FB_TextureFilter filter, FB_TextureWrap wrap)
-			: textureFormat(format), filterMin(filter), filterMag(filter), wrapR(wrap), wrapS(wrap), wrapT(wrap) {}
+		FB_TextureSpecs(FB_TextureFormat format, FB_TextureFilterMin filterMin, FB_TextureFilterMag filterMag, FB_TextureWrap wrap)
+			: textureFormat(format), filterMin(filterMin), filterMag(filterMag), wrapR(wrap), wrapS(wrap), wrapT(wrap) {}
 
-		FB_TextureSpecs(FB_TextureFormat format, FB_TextureFilter filterMin, FB_TextureFilter filterMag, FB_TextureWrap wrapR, FB_TextureWrap wrapS, FB_TextureWrap wrapT)
+		FB_TextureSpecs(FB_TextureFormat format, FB_TextureFilterMin filterMin, FB_TextureFilterMag filterMag, FB_TextureWrap wrapR, FB_TextureWrap wrapS, FB_TextureWrap wrapT)
 			: textureFormat(format), filterMin(filterMin), filterMag(filterMag), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
 
 		// ---
 		FB_TextureFormat textureFormat = FB_TextureFormat::NONE;
 
-		FB_TextureFilter filterMin = FB_TextureFilter::NONE;
-		FB_TextureFilter filterMag = FB_TextureFilter::NONE;
+		FB_TextureFilterMin filterMin = FB_TextureFilterMin::NONE;
+		FB_TextureFilterMag filterMag = FB_TextureFilterMag::NONE;
 
 		FB_TextureWrap wrapR = FB_TextureWrap::NONE;
 		FB_TextureWrap wrapS = FB_TextureWrap::NONE;

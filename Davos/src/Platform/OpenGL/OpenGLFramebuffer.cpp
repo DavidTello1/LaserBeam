@@ -83,11 +83,26 @@ namespace Davos {
 			return 0;
 		}
 
-		static GLenum GetGLTextureFilter(FB_TextureFilter filter) {
-			switch (filter)
+		static GLenum GetGLTextureFilterMin(FB_TextureFilterMin filterMin) {
+			switch (filterMin)
 			{
-				case FB_TextureFilter::LINEAR: return GL_LINEAR;
-				case FB_TextureFilter::REPEAT: return GL_REPEAT;
+				case FB_TextureFilterMin::NEAREST:					return GL_NEAREST;
+				case FB_TextureFilterMin::LINEAR:					return GL_LINEAR;
+				case FB_TextureFilterMin::NEAREST_MIPMAP_NEAREST:	return GL_NEAREST_MIPMAP_NEAREST;
+				case FB_TextureFilterMin::NEAREST_MIPMAP_LINEAR:	return GL_NEAREST_MIPMAP_LINEAR;
+				case FB_TextureFilterMin::LINEAR_MIPMAP_NEAREST:	return GL_LINEAR_MIPMAP_NEAREST;
+				case FB_TextureFilterMin::LINEAR_MIPMAP_LINEAR:		return GL_LINEAR_MIPMAP_LINEAR;
+			}
+
+			DVS_CORE_ASSERT(false);
+			return 0;
+		}
+
+		static GLenum GetGLTextureFilterMag(FB_TextureFilterMag filterMag) {
+			switch (filterMag)
+			{
+			case FB_TextureFilterMag::NEAREST:	return GL_NEAREST;
+			case FB_TextureFilterMag::LINEAR:	return GL_LINEAR;
 			}
 
 			DVS_CORE_ASSERT(false);
@@ -97,8 +112,10 @@ namespace Davos {
 		static GLenum GetGLTextureWrap(FB_TextureWrap wrap) {
 			switch (wrap)
 			{
-				case FB_TextureWrap::LINEAR: return GL_LINEAR;
-				case FB_TextureWrap::REPEAT: return GL_REPEAT;
+				case FB_TextureWrap::REPEAT:			return GL_REPEAT;
+				case FB_TextureWrap::MIRRORED_REPEAT:	return GL_MIRRORED_REPEAT;
+				case FB_TextureWrap::CLAMP_TO_EDGE:		return GL_CLAMP_TO_EDGE;
+				case FB_TextureWrap::CLAMP_TO_BORDER:	return GL_CLAMP_TO_BORDER;
 			}
 
 			DVS_CORE_ASSERT(false);
@@ -165,8 +182,8 @@ namespace Davos {
 							m_Specs.samples, 
 							GL_RGBA8, 
 							GL_RGBA, 
-							Utils::GetGLTextureFilter(textureSpecs.filterMin),
-							Utils::GetGLTextureFilter(textureSpecs.filterMag),
+							Utils::GetGLTextureFilterMin(textureSpecs.filterMin),
+							Utils::GetGLTextureFilterMag(textureSpecs.filterMag),
 							Utils::GetGLTextureWrap(textureSpecs.wrapR),
 							Utils::GetGLTextureWrap(textureSpecs.wrapS),
 							Utils::GetGLTextureWrap(textureSpecs.wrapT),
@@ -183,8 +200,8 @@ namespace Davos {
 							m_Specs.samples, 
 							GL_R32I, 
 							GL_RED_INTEGER,
-							Utils::GetGLTextureFilter(textureSpecs.filterMin),
-							Utils::GetGLTextureFilter(textureSpecs.filterMag),
+							Utils::GetGLTextureFilterMin(textureSpecs.filterMin),
+							Utils::GetGLTextureFilterMag(textureSpecs.filterMag),
 							Utils::GetGLTextureWrap(textureSpecs.wrapR),
 							Utils::GetGLTextureWrap(textureSpecs.wrapS),
 							Utils::GetGLTextureWrap(textureSpecs.wrapT),
@@ -212,8 +229,8 @@ namespace Davos {
 						m_Specs.samples, 
 						GL_DEPTH24_STENCIL8, 
 						GL_DEPTH_STENCIL_ATTACHMENT, 
-						Utils::GetGLTextureFilter(m_DepthAttachmentSpecs.filterMin),
-						Utils::GetGLTextureFilter(m_DepthAttachmentSpecs.filterMag),
+						Utils::GetGLTextureFilterMin(m_DepthAttachmentSpecs.filterMin),
+						Utils::GetGLTextureFilterMag(m_DepthAttachmentSpecs.filterMag),
 						Utils::GetGLTextureWrap(m_DepthAttachmentSpecs.wrapR),
 						Utils::GetGLTextureWrap(m_DepthAttachmentSpecs.wrapS),
 						Utils::GetGLTextureWrap(m_DepthAttachmentSpecs.wrapT),

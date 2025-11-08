@@ -31,7 +31,7 @@ namespace Davos {
 		FB_Specs m_Specs;
 
 		std::vector<FB_TextureSpecs> m_ColorAttachmentSpecs;
-		FB_TextureSpecs m_DepthAttachmentSpecs = { FB_TextureFormat::NONE, FB_TextureFilter::NONE, FB_TextureWrap::NONE };
+		FB_TextureSpecs m_DepthAttachmentSpecs = { FB_TextureFormat::NONE, FB_TextureFilterMin::NONE, FB_TextureFilterMag::NONE, FB_TextureWrap::NONE };
 
 		std::vector<uint32_t> m_ColorAttachments;
 		uint32_t m_DepthAttachment = 0;
