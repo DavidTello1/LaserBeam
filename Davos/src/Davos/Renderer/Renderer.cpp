@@ -3,6 +3,7 @@
 
 #include "RenderCommand.h"
 #include "Camera.h"
+//#include "EditorCamera.h"
 #include "Shader.h"
 #include "Texture.h"
 
@@ -87,28 +88,19 @@ namespace Davos {
 
 	void Renderer::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
-		s_Data.cameraBuffer.viewProjection = camera.GetProjectionMatrix() * glm::inverse(transform);
+		s_Data.cameraBuffer.viewProjection = camera.GetProjection() * glm::inverse(transform);
 		s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
 
 		StartBatch();
 	}
 
-	void Renderer::BeginScene(const Camera& camera)
-	{
-		s_Data.cameraBuffer.viewProjection = camera.GetViewProjectionMatrix();
-		s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
+	//void Renderer::BeginScene(const EditorCamera& camera)
+	//{
+	//	s_Data.cameraBuffer.viewProjection = camera.GetViewProjection();
+	//	s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
 
-		StartBatch();
-	}
-
-
-	void Renderer::BeginScene(/*const EditorCamera& camera*/)
-	{
-		//s_Data.cameraBuffer.viewProjection = camera.GetViewProjectionMatrix();
-		//s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
-
-		StartBatch();
-	}
+	//	StartBatch();
+	//}
 
 	void Renderer::EndScene()
 	{

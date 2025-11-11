@@ -209,39 +209,39 @@ namespace Davos {
 			return pool->Get(id);
 		}
 
-		template <typename T>
-		EntityView<T> GetView() {
-			ComponentPool<T>* pool = _GetPool<T>();
-			DVS_CORE_ASSERT(pool != nullptr, "Error Component Pool not found");
+		////template <typename T>
+		////EntityView<T> GetView() {
+		////	ComponentPool<T>* pool = _GetPool<T>();
+		////	DVS_CORE_ASSERT(pool != nullptr, "Error Component Pool not found");
 
-			std::vector<Entity> entities;
-			entities.reserve(pool->size());
+		////	std::vector<Entity> entities;
+		////	entities.reserve(pool->size());
 
-			for (uint32_t i = 0, size = pool->size(); i < size; ++i)
-			{
-				Entity entity = pool->GetEntityAt(i);
-				entities.push_back(entity);
-			}
+		////	for (uint32_t i = 0, size = pool->size(); i < size; ++i)
+		////	{
+		////		Entity entity = pool->GetEntityAt(i);
+		////		entities.push_back(entity);
+		////	}
 
-			return EntityView<T>(std::move(entities), std::make_tuple(pool));
-		}
+		////	return EntityView<T>(std::move(entities), std::make_tuple(pool));
+		////}
 
-		template <typename T>
-		const EntityView<T> GetView() const {
-			ComponentPool<T>* pool = _GetPool<T>();
-			DVS_CORE_ASSERT(pool != nullptr, "Error Component Pool not found");
+		////template <typename T>
+		////const EntityView<T> GetView() const {
+		////	ComponentPool<T>* pool = _GetPool<T>();
+		////	DVS_CORE_ASSERT(pool != nullptr, "Error Component Pool not found");
 
-			std::vector<Entity> entities;
-			entities.reserve(pool->size());
+		////	std::vector<Entity> entities;
+		////	entities.reserve(pool->size());
 
-			for (uint32_t i = 0, size = pool->size(); i < size; ++i)
-			{
-				Entity entity = pool->GetEntityAt(i);
-				entities.push_back(entity);
-			}
+		////	for (uint32_t i = 0, size = pool->size(); i < size; ++i)
+		////	{
+		////		Entity entity = pool->GetEntityAt(i);
+		////		entities.push_back(entity);
+		////	}
 
-			return EntityView<T>(std::move(entities), std::make_tuple(pool));
-		}
+		////	return EntityView<T>(std::move(entities), std::make_tuple(pool));
+		////}
 
 		template <typename... T>
 		EntityView<T...> GetView() {

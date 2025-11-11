@@ -5,26 +5,59 @@
 
 namespace Davos {
 
-	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top, float Near, float Far)
+	OrthographicCamera::OrthographicCamera()
 	{
-		m_ProjectionMatrix = glm::ortho(left, right, bottom, top, Near, Far);
-		m_ViewMatrix = glm::mat4(1.0f);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+		RecalculateProjection();
 	}
 
-	void OrthographicCamera::SetProjection(float left, float right, float bottom, float top, float Near, float Far)
+	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top, float nearClip, float farClip)
 	{
-		m_ProjectionMatrix = glm::ortho(left, right, bottom, top, Near, Far);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+		SetProjection(left, right, bottom, top, nearClip, farClip);
 	}
 
-	void OrthographicCamera::RecalculateViewMatrix()
+	OrthographicCamera::OrthographicCamera(float size, float nearClip, float farClip)
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position) *
-			glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0, 0, 1));
+		SetProjection(size, nearClip, farClip);
+	}
 
-		m_ViewMatrix = glm::inverse(transform);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+	void OrthographicCamera::SetProjection(float left, float right, float bottom, float top, float nearClip, float farClip)
+	{
+		DVS_CORE_ASSERT(right > 0 && top > 0);
+
+		m_Near = nearClip;
+		m_Far = farClip;
+		m_AspectRatio = right / top;
+		m_Size = top * 2.0f;
+
+		m_Projection = glm::ortho(left, right, bottom, top, nearClip, farClip);
+	}
+
+	void OrthographicCamera::SetProjection(float size, float nearClip, float farClip)
+	{
+		m_Size = size;
+		m_Near = nearClip;
+		m_Far = farClip;
+
+		RecalculateProjection();
+	}
+
+	void OrthographicCamera::SetViewportSize(uint32_t width, uint32_t height)
+	{
+		DVS_CORE_ASSERT(width > 0 && height > 0);
+
+		m_AspectRatio = (float)width / (float)height;
+		RecalculateProjection();
+	}
+
+	// --------------------------------------------------
+	void OrthographicCamera::RecalculateProjection()
+	{
+		float left = -m_Size * m_AspectRatio * 0.5f;
+		float right = m_Size * m_AspectRatio * 0.5f;
+		float bottom = -m_Size * 0.5f;
+		float top = m_Size * 0.5f;
+
+		m_Projection = glm::ortho(left, right, bottom, top, m_Near, m_Far);
 	}
 
 }

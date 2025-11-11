@@ -8,7 +8,7 @@ namespace Davos {
 	class UUID;
 	class TimeStep;
 	class Camera;
-	//struct C_Camera;
+	struct C_Camera;
 
 	class Scene
 	{
@@ -17,13 +17,15 @@ namespace Davos {
 		~Scene();
 
 		void OnUpdate(TimeStep dt);
-		void OnRender(const Camera& camera);
+		void OnRender();
 
 		//void OnStart();
 		//void OnStop();
-		//void OnViewportResize(uint32_t width, uint32_t height);
+		void OnViewportResize(uint32_t width, uint32_t height);
 
-		//C_Camera GetMainCamera();
+		UUID GetMainCamera() const { return m_MainCamera; }
+		void SetMainCamera(UUID camera);
+
 		//UUID FindEntity(const std::string& name);
 
 		//bool IsRunning() const { return m_IsRunning; }
@@ -131,8 +133,7 @@ namespace Davos {
 		std::unordered_map<UUID, Entity> m_EntityHandles;
 		EntityManager m_EntityManager;
 
-		//uint32_t m_ViewportWidth = 0;
-		//uint32_t m_ViewportHeight = 0;
+		UUID m_MainCamera = 0;
 
 		//bool m_IsRunning = false;
 		//bool m_IsPaused = false;

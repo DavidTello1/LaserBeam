@@ -20,18 +20,33 @@ namespace Davos {
 	{
 	}
 
-	void Scene::OnRender(const Camera& camera)
+	void Scene::OnRender()
 	{
-		//if (!m_MainCamera)
-		//{
-		//	DVS_CORE_WARN("Trying to render Scene without camera");
-		//	return;
-		//}
+		if (m_MainCamera == 0)
+		{
+			DVS_CORE_WARN("MainCamera is not defined");
+			return;
+		}
 
-		Renderer::BeginScene(camera);
+		// Get MainCamera
+		Camera mainCamera;
+		glm::mat4 mainCameraTransform;
+		auto cameraView = m_EntityManager.GetView<C_Transform, C_Camera>();
+		for (auto [entity, transform, camera] : cameraView)
+		{
+			if (entity != m_EntityHandles[m_MainCamera])
+				continue;
 
-		const EntityView<C_Transform, C_SpriteRenderer>& view = m_EntityManager.GetView<C_Transform, C_SpriteRenderer>();
-		for (auto [entity, transform, sprite] : view)
+			mainCamera = (Camera)camera.camera;
+			mainCameraTransform = transform.GetTransform();
+			break;
+		}
+
+		// Render Scene
+		Renderer::BeginScene(mainCamera, mainCameraTransform);
+
+		const auto spriteView = m_EntityManager.GetView<C_Transform, C_SpriteRenderer>();
+		for (auto [entity, transform, sprite] : spriteView)
 		{
 			if (sprite.texture.get())
 				Renderer::DrawSprite(transform.GetTransform(), sprite.texture, sprite.color, sprite.tilingFactor);
@@ -40,37 +55,29 @@ namespace Davos {
 		}
 
 		Renderer::EndScene();
+	}
 
-		//	// Renderer Draw
-		//	// ---
-		//	static float rotation = 0.0f;
-		//	rotation += m_RectRotationSpeed * dt;
-		//	if (rotation >= 360.0f)
-		//		rotation = 0.0f;
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		// Resize all Non-FixedAspectRatio Cameras
+		auto view = m_EntityManager.GetView<C_Camera>();
+		for (auto [entity, camera] : view)
+		{
+			if (camera.isFixedAspectRatio)
+				continue;
 
-		//	Renderer::BeginScene(m_CameraController.GetCamera());
+			camera.camera.SetViewportSize(width, height);
+		}
+	}
 
-		//	Renderer::DrawRectFilled({ 0.0f, 0.0f, 1.0f }, rotation, { 1.0f, 1.0f }, m_RectBackgroundColor, m_RectBorderColor);
-		//	Renderer::DrawRect({ -2.05f, 0.25f, 1.0f }, 0.0f, { 1.0f, 1.0f }, m_RectBorderColor);
+	void Scene::SetMainCamera(UUID camera)
+	{
+		DVS_CORE_ASSERT(camera != 0, "Invalid UUID");
 
-		//	Renderer::DrawSprite({ 2.0f, 0.0f, 1.0f }, m_SpriteRotation, { 0.8f, 0.8f }, m_Texture, { 0.2f, 0.3f, 0.8f, 0.5f });
-		//	Renderer::DrawSprite({ 0.0f, 0.0f, 0.5f }, 0.0f, { 4.0f, 4.0f }, m_Texture, glm::vec4(1.0f), 10.0f);
+		Entity entity = m_EntityHandles[camera];
+		DVS_CORE_ASSERT(m_EntityManager.HasComponent<C_Camera>(entity), "Entity doesn't have Camera component");
 
-		//	Renderer::EndScene();
-
-		//	// ---
-		//	Renderer::BeginScene(m_CameraController.GetCamera());
-
-		//	for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		//	{
-		//		for (float x = -5.0f; x < 5.0f; x += 0.5f)
-		//		{
-		//			glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
-		//			Renderer::DrawRectFilled({ x, y, 0.0f }, 0.0f, { 0.45f, 0.45f }, color);
-		//		}
-		//	}
-
-		//	Renderer::EndScene();
+		m_MainCamera = camera;
 	}
 
 	// -----------------------------------------------
