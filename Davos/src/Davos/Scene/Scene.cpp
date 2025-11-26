@@ -1,10 +1,10 @@
 #include "dvs_pch.h"
 #include "Scene.h"
 
-#include "Davos/Core/TimeStep.h"
+#include "Components.h"
+#include "ScriptableEntity.h"
+
 #include "Davos/Renderer/Renderer.h"
-#include "Davos/Scene/Components.h"
-#include "Davos/Renderer/OrthographicCamera.h" //***
 
 namespace Davos {
 
@@ -14,15 +14,36 @@ namespace Davos {
 
 	Scene::~Scene()
 	{
+		// Destroy Scripts
+		for (auto [entity, script] : m_EntityManager.GetView<C_NativeScript>())
+		{
+			if (script.instance)
+				script.DestroyScript(&script);
+		}
 	}
 
 	void Scene::OnUpdate(TimeStep dt)
 	{
+		//*** TODO: Move to Scene::OnScenePlay
+		auto view = m_EntityManager.GetView<C_NativeScript>();
+		for (auto [entity, script] : view)
+		{
+			Entity id = entity;
+			if (!script.instance)
+			{
+				script.instance = script.InstantiateScript();
+				script.instance->m_Handle = id;
+				script.instance->m_Scene = this;
+				script.instance->OnCreate();
+			}
+
+			script.instance->OnUpdate(dt);
+		}
 	}
 
 	void Scene::OnRender()
 	{
-		if (m_MainCamera == 0)
+		if (m_MainCamera == MAX_ENTITIES)
 		{
 			DVS_CORE_WARN("MainCamera is not defined");
 			return;
@@ -34,7 +55,7 @@ namespace Davos {
 		auto cameraView = m_EntityManager.GetView<C_Transform, C_Camera>();
 		for (auto [entity, transform, camera] : cameraView)
 		{
-			if (entity != m_EntityHandles[m_MainCamera])
+			if (entity != m_MainCamera)
 				continue;
 
 			mainCamera = (Camera)camera.camera;
@@ -42,16 +63,81 @@ namespace Davos {
 			break;
 		}
 
-		// Render Scene
+		// --- Render Scene ---
 		Renderer::BeginScene(mainCamera, mainCameraTransform);
 
+		// Sprites
 		const auto spriteView = m_EntityManager.GetView<C_Transform, C_SpriteRenderer>();
-		for (auto [entity, transform, sprite] : spriteView)
+		for (const auto& [entity, transform, sprite] : spriteView)
 		{
 			if (sprite.texture.get())
 				Renderer::DrawSprite(transform.GetTransform(), sprite.texture, sprite.color, sprite.tilingFactor);
 			else
 				Renderer::DrawQuad(transform.GetTransform(), sprite.color);
+		}
+
+		// TileMap
+		const auto tileMapView = m_EntityManager.GetView<C_Transform, C_LevelMap>();
+		for (const auto& [entity, transform, tileMap] : tileMapView)
+		{
+			// Draw Grid
+			if (tileMap.isDrawGrid)
+			{
+				for (int i = 0; i < tileMap.gridSize.x + 1; ++i) // Vertical Lines
+				{
+					glm::vec3 start = glm::vec3(
+						transform.translation.x + (tileMap.cellSize.x * i),
+						transform.translation.y,
+						transform.translation.z + 0.1f //*** manual offset
+					);
+
+					glm::vec3 end = glm::vec3(
+						start.x,
+						start.y + (tileMap.cellSize.y * tileMap.gridSize.y),
+						start.z
+					);
+
+					Renderer::DrawLine(start, end, tileMap.gridColor);
+				}
+
+				for (int i = 0; i < tileMap.gridSize.y + 1; ++i) // Horizontal Lines
+				{
+					glm::vec3 start = glm::vec3(
+						transform.translation.x,
+						transform.translation.y + (tileMap.cellSize.y * i),
+						transform.translation.z + 0.1f //*** manual offset
+					);
+
+					glm::vec3 end = glm::vec3(
+						start.x + (tileMap.cellSize.x * tileMap.gridSize.x),
+						start.y,
+						start.z
+					);
+
+					Renderer::DrawLine(start, end, tileMap.gridColor);
+				}
+			}
+
+			// Draw TileMap
+			for (uint32_t i = 0; i < tileMap.cells.size(); ++i)
+			{
+				glm::vec3 tilePos = glm::vec3(
+					transform.translation.x + (tileMap.cellSize.x * (i % tileMap.gridSize.x)),
+					transform.translation.y + (tileMap.cellSize.y * (i / tileMap.gridSize.x)),
+					transform.translation.z
+				);
+
+				glm::vec3 tileScale = glm::vec3(
+					transform.scale.x * tileMap.cellSize.x,
+					transform.scale.y * tileMap.cellSize.y,
+					transform.scale.z
+				);
+
+				glm::mat4 tileTransform = glm::translate(glm::mat4(1.0f), tilePos) * glm::scale(glm::mat4(1.0f), tileScale);
+
+				Renderer::DrawQuad(tileTransform, tileMap.tintColor);
+				//Renderer::DrawTile(tileTransform, tileMap.tileset.texture.get(), tileCoords, { tileScale.x, tileScale.y }, tileMap.tintColor);
+			}
 		}
 
 		Renderer::EndScene();
@@ -70,34 +156,33 @@ namespace Davos {
 		}
 	}
 
-	void Scene::SetMainCamera(UUID camera)
+	void Scene::SetMainCamera(Entity id)
 	{
-		DVS_CORE_ASSERT(camera != 0, "Invalid UUID");
+		DVS_CORE_ASSERT(id < MAX_ENTITIES, "Invalid Entity ID");
+		DVS_CORE_ASSERT(m_EntityManager.HasComponent<C_Camera>(id), "Entity doesn't have Camera component");
 
-		Entity entity = m_EntityHandles[camera];
-		DVS_CORE_ASSERT(m_EntityManager.HasComponent<C_Camera>(entity), "Entity doesn't have Camera component");
-
-		m_MainCamera = camera;
+		m_MainCamera = id;
 	}
 
-	// -----------------------------------------------
-	UUID Scene::CreateEntity(UUID id)
-	{
-		UUID entity = UUID();
-		m_EntityHandles[entity] = m_EntityManager.CreateEntity();
-		return entity;
-	}
+	//// -----------------------------------------------
+	//Entity Scene::CreateEntity(Entity id)
+	//{
+	//	//UUID entity = (id != 0) ? id : UUID();
+	//	//m_EntityHandles[entity] = m_EntityManager.CreateEntity();
 
-	UUID Scene::DuplicateEntity(UUID id)
-	{
-		UUID entity = UUID();
-		m_EntityManager.DuplicateEntity(m_EntityHandles[id]);
-		return entity;
-	}
+	//	//---
+	//	Entity parent = (parentID != 0) ? m_EntityHandles[parentID] : m_EntityHandles[m_RootNode];
 
-	void Scene::DestroyEntity(UUID id)
-	{
-		m_EntityManager.DestroyEntity(m_EntityHandles[id]);
-	}
+	//	// Always add C_Hierarchy to every Entity
+	//	AddComponent<C_Hierarchy>(entity, parent);
 
+	//	auto& ch = GetComponent<C_Hierarchy>(parent);
+	//	ch.numChilds++;
+	//	ch.firstChild = entity;
+
+	//	// Always add C_Tag to every Entity
+	//	AddComponent<C_Tag>(entity, name.c_str());
+
+	//	return entity;
+	//}
 }

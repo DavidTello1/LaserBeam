@@ -4,8 +4,6 @@
 
 namespace Davos {
 
-	class Framebuffer;
-
 	class PanelViewport
 	{
 	public:
@@ -22,6 +20,7 @@ namespace Davos {
 
 		bool IsFocused() const { return m_ViewportFocused; }
 		bool IsHovered() const { return m_ViewportHovered; }
+		const glm::vec2& GetViewportSize() const { return m_ViewportSize; }
 
 	private:
 		bool m_ViewportFocused = false;

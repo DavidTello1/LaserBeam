@@ -1,7 +1,7 @@
 #pragma once
-#include <Davos.h>
-
 #include "Panels/PanelViewport.h"
+#include "Panels/PanelHierarchy.h"
+#include "Panels/PanelInspector.h"
 
 namespace Davos {
 
@@ -20,6 +20,8 @@ namespace Davos {
 		void OnEvent(Event& e) override;
 
 	private:
+		void _DrawMainMenubar();
+		void _DrawToolbar();
 		void _Dockspace();
 
 	private:
@@ -28,13 +30,12 @@ namespace Davos {
 
 		// Panels
 		PanelViewport m_PanelViewport;
-
-		OrthographicCameraController m_CameraController;
-		UUID m_Camera;
+		PanelHierarchy m_PanelHierarchy;
+		PanelInspector m_PanelInspector;
 
 		// -------------------------------------------------
 		//*** Debug
-		UUID m_Square, m_Sprite, m_RotatingSquare;
+		Entity m_Camera, m_Square, m_Sprite, m_RotatingSquare;
 
 		float m_SpriteRotation = 30.0f;
 		float m_RectRotationSpeed = 10.0f;

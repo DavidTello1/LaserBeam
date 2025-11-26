@@ -1,12 +1,10 @@
 #pragma once
 #include "EntityManager.h"
 
-#include "Davos/Core/UUID.h"
+#include "Davos/Core/TimeStep.h"
 
 namespace Davos {
 
-	class UUID;
-	class TimeStep;
 	class Camera;
 	struct C_Camera;
 
@@ -23,8 +21,8 @@ namespace Davos {
 		//void OnStop();
 		void OnViewportResize(uint32_t width, uint32_t height);
 
-		UUID GetMainCamera() const { return m_MainCamera; }
-		void SetMainCamera(UUID camera);
+		Entity GetMainCamera() const { return m_MainCamera; }
+		void SetMainCamera(Entity camera);
 
 		//UUID FindEntity(const std::string& name);
 
@@ -36,104 +34,102 @@ namespace Davos {
 
 		// -------------------------------------------
 		// --- ENTITIES ---
-		UUID CreateEntity(UUID id = 0);
+		inline Entity CreateEntity() {
+			return m_EntityManager.CreateEntity();
+		}
+
+		inline Entity DuplicateEntity(Entity id) {
+			return m_EntityManager.DuplicateEntity(id);
+		}
+
+		inline void DestroyEntity(Entity id) {
+			m_EntityManager.DestroyEntity(id);
+		}
+
 		//Entity CreatePrefab(Prefab::Type type, Entity id = 0);
-		UUID DuplicateEntity(UUID id);
-		void DestroyEntity(UUID id);
-
-		template <typename T>
-		inline EntityView<T>& GetAllEntitiesWith() {
-			return m_EntityManager.GetView<T>();
-		}
-
-		template <typename T>
-		inline const EntityView<T>& GetAllEntitiesWith() const { 
-			return m_EntityManager.GetView<T>();
-		}
 
 		template <typename... T>
-		inline EntityView<T...>& GetAllEntitiesWith() {
+		inline EntityView<T...> GetAllEntitiesWith() {
 			return m_EntityManager.GetView<T...>();
 		}
 
 		template <typename... T>
-		inline const EntityView<T...>& GetAllEntitiesWith() const {
+		inline const EntityView<T...> GetAllEntitiesWith() const {
 			return m_EntityManager.GetView<T...>(); 
 		}
 
 		// -------------------------------------------
 		// --- COMPONENTS ---
 		template <typename T>
-		inline bool HasComponent(UUID id) { 
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.HasComponent<T>(handle); 
+		inline bool HasComponent(Entity id) const { 
+			return m_EntityManager.HasComponent<T>(id); 
 		}
 
 		template <typename... T>
-		inline bool HasComponents(UUID id) { 
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.HasComponents<T...>(handle); 
+		inline bool HasComponents(Entity id) const { 
+			return m_EntityManager.HasComponents<T...>(id); 
 		}
 
 		template <typename T>
-		inline T& AddComponent(UUID id, const T& component) {
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.AddComponent<T>(handle, component);
+		inline T& AddComponent(Entity id, const T& component) {
+			return m_EntityManager.AddComponent<T>(id, component);
 		}
 
 		template <typename T, typename... Args>
-		inline T& AddComponent(UUID id, Args&&... args) { 
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.AddComponent<T>(handle, std::forward<Args>(args)...); 
+		inline T& AddComponent(Entity id, Args&&... args) { 
+			return m_EntityManager.AddComponent<T>(id, std::forward<Args>(args)...); 
 		}
 
 		template <typename T>
 		inline T& ReplaceComponent(Entity entity, const T& component) {
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.ReplaceComponent<T>(handle, component);
+			return m_EntityManager.ReplaceComponent<T>(id, component);
 		}
 
 		template <typename T, typename... Args>
 		inline T& ReplaceComponent(Entity entity, Args&&... args) {
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.ReplaceComponent<T>(handle, std::forward<Args>(args)...);
+			return m_EntityManager.ReplaceComponent<T>(id, std::forward<Args>(args)...);
 		}
 
 		template <typename T, typename... Args>
-		inline T& AddOrReplaceComponent(UUID id, Args&&... args) { 
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.AddOrReplaceComponent<T>(handle, std::forward<Args>(args)...); 
+		inline T& AddOrReplaceComponent(Entity id, Args&&... args) { 
+			return m_EntityManager.AddOrReplaceComponent<T>(id, std::forward<Args>(args)...); 
 		}
 
 		template <typename T>
-		inline void RemoveComponent(UUID id) { 
-			Entity handle = m_EntityHandles[id];
-			m_EntityManager.RemoveComponent<T>(handle); 
+		inline void RemoveComponent(Entity id) { 
+			m_EntityManager.RemoveComponent<T>(id); 
 		}
 
 		template <typename... T>
-		inline void RemoveComponents(UUID id) { 
-			Entity handle = m_EntityHandles[id];
-			m_EntityManager.RemoveComponents<T...>(handle); 
+		inline void RemoveComponents(Entity id) { 
+			m_EntityManager.RemoveComponents<T...>(id); 
 		}
 
 		template <typename T>
-		inline const T& GetComponent(UUID id) const {
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.GetComponent<T>(handle);
+		inline T& GetComponent(Entity id) {
+			return m_EntityManager.GetComponent<T>(id);
 		}
 
 		template <typename T>
-		inline T& GetComponent(UUID id) {
-			Entity handle = m_EntityHandles[id];
-			return m_EntityManager.GetComponent<T>(handle);
+		inline const T& GetComponent(Entity id) const {
+			return m_EntityManager.GetComponent<T>(id);
+		}
+
+		template <typename T>
+		inline T* TryGetComponent(Entity id) {
+			return m_EntityManager.TryGetComponent<T>(id);
+		}
+
+		template <typename T>
+		inline const T* TryGetComponent(Entity id) const {
+			return m_EntityManager.TryGetComponent<T>(id);
 		}
 
 	private:
-		std::unordered_map<UUID, Entity> m_EntityHandles;
 		EntityManager m_EntityManager;
 
-		UUID m_MainCamera = 0;
+		Entity m_RootNode = MAX_ENTITIES;
+		Entity m_MainCamera = MAX_ENTITIES;
 
 		//bool m_IsRunning = false;
 		//bool m_IsPaused = false;

@@ -1,11 +1,13 @@
 #include "EditorLayer.h"
 
+#include "NativeScripts/CameraController.h"
+
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Davos {
 
-	EditorLayer::EditorLayer() : Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f)
+	EditorLayer::EditorLayer() : Layer("EditorLayer")
 	{
 	}
 
@@ -16,56 +18,59 @@ namespace Davos {
 
 		// Panels
 		m_PanelViewport.OnInit();
+		m_PanelHierarchy.SetScene(m_ActiveScene);
+		m_PanelInspector.SetScene(m_ActiveScene);
 
 		// Assets
 		m_Texture = Texture2D::Create("assets/textures/checkerboard.png");
 
-		// -------------------------------------------
 		//Renderer::SetLineWidth(m_LineWidth);
 
-		//*** ---
-		//m_Camera = m_ActiveScene->CreateEntity();
+		// -------------------------------------------
+		//// Camera
+		//m_Camera = m_ActiveScene->CreateEntity("Camera");
 		//m_ActiveScene->AddComponent<C_Transform>(m_Camera);
-		//C_CameraController cameraController = m_ActiveScene->AddComponent<C_CameraController>(m_Camera, 1280.0f / 720.0f);
+		//m_ActiveScene->AddComponent<C_Camera>(m_Camera);
+		//m_ActiveScene->AddComponent<C_NativeScript>(m_Camera).Bind<CameraController>();
+		//m_ActiveScene->SetMainCamera(m_Camera);
 
-		// Square
-		m_Square = m_ActiveScene->CreateEntity();
-		m_ActiveScene->AddComponent<C_Transform>(m_Square);
-		m_ActiveScene->AddComponent<C_SpriteRenderer>(m_Square, m_RectBackgroundColor);
+		//// Square
+		//m_Square = m_ActiveScene->CreateEntity("Square");
+		//m_ActiveScene->AddComponent<C_Transform>(m_Square);
+		//m_ActiveScene->AddComponent<C_SpriteRenderer>(m_Square, m_RectBackgroundColor);
 
-		// Sprite
-		m_Sprite = m_ActiveScene->CreateEntity();
-		auto& spriteTransform = m_ActiveScene->AddComponent<C_Transform>(m_Sprite);
-		spriteTransform.translation = { 2.0f, 0.0f, 1.0f };
-		spriteTransform.rotation = { 0.0f, 0.0f, glm::radians(m_SpriteRotation) };
-		spriteTransform.scale = { 0.8f, 0.8f, 1.0f };
-		auto& spriteRenderer = m_ActiveScene->AddComponent<C_SpriteRenderer>(m_Sprite);
-		spriteRenderer.texture = m_Texture;
+		//// Sprite
+		//m_Sprite = m_ActiveScene->CreateEntity("Sprite");
+		//auto& spriteTransform = m_ActiveScene->AddComponent<C_Transform>(m_Sprite);
+		//spriteTransform.translation = { 2.0f, 0.0f, 1.0f };
+		//spriteTransform.rotation = { 0.0f, 0.0f, glm::radians(m_SpriteRotation) };
+		//spriteTransform.scale = { 0.8f, 0.8f, 1.0f };
+		//auto& spriteRenderer = m_ActiveScene->AddComponent<C_SpriteRenderer>(m_Sprite);
+		//spriteRenderer.texture = m_Texture;
 
-		// Rotating Square
-		m_RotatingSquare = m_ActiveScene->CreateEntity();
-		auto& rsquareTransform = m_ActiveScene->AddComponent<C_Transform>(m_RotatingSquare);
-		rsquareTransform.translation = { -2.5f, 0.0f, 1.0f };
-		rsquareTransform.scale = { 2.0f, 2.0f, 1.0f };
+		//// Rotating Square
+		//m_RotatingSquare = m_ActiveScene->CreateEntity("Rotating Square");
+		//auto& rsquareTransform = m_ActiveScene->AddComponent<C_Transform>(m_RotatingSquare);
+		//rsquareTransform.translation = { -2.5f, 0.0f, 1.0f };
+		//rsquareTransform.scale = { 2.0f, 2.0f, 1.0f };
+		//m_ActiveScene->AddComponent<C_SpriteRenderer>(m_RotatingSquare, m_RectBackgroundColor);
 
-		m_ActiveScene->AddComponent<C_SpriteRenderer>(m_RotatingSquare, m_RectBackgroundColor);
+		//// Quad Grid
+		//for (float y = -5.0f; y < 5.0f; y += 0.5f)
+		//{
+		//	for (float x = -5.0f; x < 5.0f; x += 0.5f)
+		//	{
+		//		glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
 
-		// Quad Grid
-		for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		{
-			for (float x = -5.0f; x < 5.0f; x += 0.5f)
-			{
-				glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
+		//		UUID cell = m_ActiveScene->CreateEntity();
 
-				UUID cell = m_ActiveScene->CreateEntity();
+		//		auto& cellTransform = m_ActiveScene->AddComponent<C_Transform>(cell);
+		//		cellTransform.translation = { x, y, 0.0f };
+		//		cellTransform.scale = { 0.45f, 0.45f, 1.0f };
 
-				auto& cellTransform = m_ActiveScene->AddComponent<C_Transform>(cell);
-				cellTransform.translation = { x, y, 0.0f };
-				cellTransform.scale = { 0.45f, 0.45f, 1.0f };
-
-				m_ActiveScene->AddComponent<C_SpriteRenderer>(cell, color);
-			}
-		}
+		//		m_ActiveScene->AddComponent<C_SpriteRenderer>(cell, color);
+		//	}
+		//}
 	}
 
 	void EditorLayer::OnCleanUp()
@@ -74,42 +79,37 @@ namespace Davos {
 
 	void EditorLayer::OnUpdate(TimeStep dt)
 	{
-		//m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		// --- Resize
 		m_PanelViewport.OnResize();
 
-		// --- Update
-		//  Camera Update
-		if (m_PanelViewport.IsFocused())
-		{
-			m_CameraController.OnUpdate(dt);
+		glm::vec2 viewportSize = m_PanelViewport.GetViewportSize();
+		m_ActiveScene->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 
-			//C_CameraController camera = m_ActiveScene->GetComponent<C_CameraController>(m_Camera);
-			//C_Transform cameraTransform = m_ActiveScene->GetComponent<C_Transform>(m_Camera);
-			//camera.controller.OnUpdate(dt);
-		}
+		//// --- Update
+		//if (m_PanelViewport.IsFocused())
+		//	m_CameraController.OnUpdate(dt);
 
-		// Scene Update
 		m_ActiveScene->OnUpdate(dt);
 
-		// Rotating Quad Update
-		static float rotation = 0.0f;
-		rotation += m_RectRotationSpeed * dt;
-		if (rotation >= 360.0f)
-			rotation = 0.0f;
-		auto& rsquareTransform = m_ActiveScene->GetComponent<C_Transform>(m_RotatingSquare);
-		rsquareTransform.SetRotation(rotation);
+		////*** DEBUG ***
+		//{ 
+		//	// Rotating Quad Update [make NATIVE_SCRIPT]
+		//	static float rotation = 0.0f;
+		//	rotation += m_RectRotationSpeed * dt;
+		//	if (rotation >= 360.0f)
+		//		rotation = 0.0f;
+		//	auto& rsquareTransform = m_ActiveScene->GetComponent<C_Transform>(m_RotatingSquare);
+		//	rsquareTransform.SetRotation(rotation);
+		//}
 
 		// --- Render
 		Renderer::ResetStats();
 		m_PanelViewport.BindFramebuffer();
 
-		// Renderer Prep
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderCommand::Clear();
 
-		// Renderer Draw
-		m_ActiveScene->OnRender(m_CameraController.GetCamera());
-
+		m_ActiveScene->OnRender();
 		m_PanelViewport.UnbindFramebuffer();
 	}
 
@@ -119,12 +119,20 @@ namespace Davos {
 		_Dockspace();
 
 		// Main MenuBar
+		_DrawMainMenubar();
 
 		// ToolBar
+		_DrawToolbar();
 
 		// Panels
 		m_PanelViewport.OnRender();
+		m_PanelHierarchy.OnImGuiRender();
 
+		Node* node = m_PanelHierarchy.GetSelectedNode();
+		m_PanelInspector.SetSelectedNode(node);
+		m_PanelInspector.OnImGuiRender();
+
+		//---------------------------------------------------
 		//*** DEBUG
 		ImGui::Begin("Debug Panel");
 
@@ -135,37 +143,37 @@ namespace Davos {
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
-		ImGui::Separator();
-		ImGui::Text("--- Scene Settings ---");
-
-		ImGui::PushItemWidth(100.0f);
-
-		m_SpriteRotation = m_ActiveScene->GetComponent<C_Transform>(m_Sprite).GetRotationDegrees();
-		if (ImGui::DragFloat("Sprite Rotation", &m_SpriteRotation, 1.0f, -360.0f, 360.0f, "%.1f"))
-			m_ActiveScene->GetComponent<C_Transform>(m_Sprite).SetRotation(m_SpriteRotation);
-
-		ImGui::DragFloat("Rect Rotation Speed", &m_RectRotationSpeed, 0.1f, -100.0f, 100.0f, "%.1f");
-
-		//ImGui::DragFloat("Line Width", &m_LineWidth, 0.1f, 1.0f, 5.0f, "%.1f");
-		ImGui::PopItemWidth();
-
-		ImGui::ColorEdit4("Rect Color", glm::value_ptr(m_ActiveScene->GetComponent<C_SpriteRenderer>(m_Square).color));
-		//ImGui::ColorEdit4("Rect Border Color", glm::value_ptr(m_RectBorderColor));
-
-		////ImGui::InputText("Text", &text.c_str(), text.length());
-
 		//ImGui::Separator();
 		//ImGui::Text("--- Scene Settings ---");
 
 		//ImGui::PushItemWidth(100.0f);
-		//static float moveSpeed = m_CameraController.GetMoveSpeed();
-		//if (ImGui::DragFloat("Move Speed", &moveSpeed, 1.0f, 0.0f, 1000.0f, "%.1f"))
-		//	m_CameraController.SetMoveSpeed(moveSpeed);
 
-		//static float zoomSensitivity = m_CameraController.GetZoomSensitivity();
-		//if (ImGui::DragFloat("Zoom Sensitivity", &zoomSensitivity, 0.01f, 0.0f, 1.0f, "%.2f"))
-		//	m_CameraController.SetZoomSensitivity(zoomSensitivity);
+		//m_SpriteRotation = m_ActiveScene->GetComponent<C_Transform>(m_Sprite).GetRotationDegrees();
+		//if (ImGui::DragFloat("Sprite Rotation", &m_SpriteRotation, 1.0f, -360.0f, 360.0f, "%.1f"))
+		//	m_ActiveScene->GetComponent<C_Transform>(m_Sprite).SetRotation(m_SpriteRotation);
+
+		//ImGui::DragFloat("Rect Rotation Speed", &m_RectRotationSpeed, 0.1f, -100.0f, 100.0f, "%.1f");
+
+		////ImGui::DragFloat("Line Width", &m_LineWidth, 0.1f, 1.0f, 5.0f, "%.1f");
 		//ImGui::PopItemWidth();
+
+		//ImGui::ColorEdit4("Rect Color", glm::value_ptr(m_ActiveScene->GetComponent<C_SpriteRenderer>(m_Square).color));
+		////ImGui::ColorEdit4("Rect Border Color", glm::value_ptr(m_RectBorderColor));
+
+		//////ImGui::InputText("Text", &text.c_str(), text.length());
+
+		////ImGui::Separator();
+		////ImGui::Text("--- Scene Settings ---");
+
+		////ImGui::PushItemWidth(100.0f);
+		////static float moveSpeed = m_CameraController.GetMoveSpeed();
+		////if (ImGui::DragFloat("Move Speed", &moveSpeed, 1.0f, 0.0f, 1000.0f, "%.1f"))
+		////	m_CameraController.SetMoveSpeed(moveSpeed);
+
+		////static float zoomSensitivity = m_CameraController.GetZoomSensitivity();
+		////if (ImGui::DragFloat("Zoom Sensitivity", &zoomSensitivity, 0.01f, 0.0f, 1.0f, "%.2f"))
+		////	m_CameraController.SetZoomSensitivity(zoomSensitivity);
+		////ImGui::PopItemWidth();
 
 		ImGui::End();
 	}
@@ -175,10 +183,47 @@ namespace Davos {
 		//C_CameraController camera = m_ActiveScene->GetComponent<C_CameraController>(m_Camera);
 		//camera.controller.OnEvent(e);
 
-		m_CameraController.OnEvent(e);
+		//m_CameraController.OnEvent(e);
 	}
 
 	// -----------------------------------------------
+	void EditorLayer::_DrawMainMenubar()
+	{
+		// --- Escena ---
+		// 
+		// New Scene (Ctrl+N)
+		// Open Scene (Ctrl+O)
+		// ---
+		// Save Scene (Ctrl+S)
+		// Save Scene As...
+		// Save All Scenes (Ctrl+Shift+S)
+		// ---
+		// Undo (Ctrl+Z)
+		// Redo (Ctrl+Shift+Z)
+		// ---
+		// Close Scene (Ctrl+Shift+W)
+		// ---
+		// Exit (Ctrl+Q)
+
+
+		// --- Proyecto ---
+		//
+		// Settings 
+		// Build
+
+
+		// --- Scene State --- (Centered)
+		//
+		// Play (Opens Game Window)
+		// Pause
+		// Stop (Closes Game Window)
+	}
+
+	void EditorLayer::_DrawToolbar()
+	{
+
+	}
+
 	void EditorLayer::_Dockspace()
 	{
 		// Note: Switch this to true to enable dockspace
