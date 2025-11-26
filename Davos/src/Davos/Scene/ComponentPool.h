@@ -126,6 +126,22 @@ namespace Davos {
 			return components[index];
 		}
 
+		T* TryGet(uint32_t entity) {
+			if (!Has(entity))
+				return nullptr;
+
+			uint32_t index = sparse[entity];
+			return &components[index];
+		}
+
+		const T* TryGet(uint32_t entity) const {
+			if (!Has(entity))
+				return nullptr;
+
+			uint32_t index = sparse[entity];
+			return &components[index];
+		}
+
 		uint32_t GetEntityAt(uint32_t index) const override {
 			DVS_CORE_ASSERT(index < count, "Index is out of bounds");
 			return dense[index];

@@ -13,7 +13,7 @@ namespace Davos {
 	{
 	}
 
-	Entity EntityManager::CreateEntity(Entity id)
+	Entity EntityManager::CreateEntity()
 	{
 		DVS_CORE_ASSERT(m_NumEntities < MAX_ENTITIES, "Reached limit number of entities");
 
@@ -51,12 +51,13 @@ namespace Davos {
 			pool->Remove(id);
 		}
 
-		//m_EntityMasks.erase(id);
+		m_AvailableIndices.push(id);
+		--m_NumEntities;
 	}
 
 	bool EntityManager::Exists(Entity id) const
 	{
-		return id < m_NumEntities; //*** invalid when removing and recycling entities
+		return id < m_NumEntities; //***BUG invalid when removing and recycling entities
 	}
 
 }

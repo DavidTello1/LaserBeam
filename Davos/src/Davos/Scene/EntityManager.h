@@ -12,70 +12,170 @@ namespace Davos {
 	template <typename... T>
 	class EntityView
 	{
-	public:
-		std::vector<Entity> m_Entities;
+	private:
 		std::tuple<ComponentPool<T>*...> m_Pools;
+		IComponentPool* m_Smallest;
 
 	public:
+		EntityView()
+			: m_Pools(std::make_tuple((ComponentPool<T>*)nullptr ...)),
+			m_Smallest(nullptr)
+		{}
+
+		EntityView(std::tuple<ComponentPool<T>*...> pools)
+			: m_Pools(pools),
+			m_Smallest(_FindSmallestPool(pools))
+		{}
+
+		bool empty() const {
+			return m_Smallest == nullptr || m_Smallest->size() == 0;
+		}
+
+		size_t size() const {
+			return m_Smallest ? m_Smallest->size() : 0;
+		}
+
 		class Iterator
 		{
 		public:
-			Iterator(std::vector<Entity>::iterator it, std::tuple<ComponentPool<T>*...>& pools)
-				: m_It(it), m_Pools(pools) {}
-
-			std::tuple<Entity, T&...> operator*() const
+			Iterator(uint32_t index, uint32_t end, EntityView* view) 
+				: index(index), end(end), view(view) 
 			{
-				return std::forward_as_tuple(*m_It, std::get<ComponentPool<T>*>(m_Pools)->Get(*m_It)...);
+				_SkipInvalid();
 			}
 
-			Iterator& operator++() { ++m_It; return *this; }
-			Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+			Iterator& operator++() {
+				++index;
+				_SkipInvalid();
+				return *this;
+			}
 
-			bool operator==(const Iterator& other) const { return m_It == other.m_It; }
-			bool operator!=(const Iterator& other) const { return !(*this == other); }
+			bool operator !=(const Iterator& other) const {
+				return index != other.index;
+			}
+
+			auto operator*() const {
+				Entity entity = view->m_Smallest->GetEntityAt(index);
+				return std::forward_as_tuple(entity, std::get<ComponentPool<T>*>(view->m_Pools)->Get(entity)...);
+			}
 
 		private:
-			std::vector<Entity>::iterator m_It;
-			std::tuple<ComponentPool<T>*...>& m_Pools;
+			void _SkipInvalid() {
+				if (!view->m_Smallest)
+					return;
+
+				while (index < end)
+				{
+					Entity entity = view->m_Smallest->GetEntityAt(index);
+
+					if ((std::get<ComponentPool<T>*>(view->m_Pools)->Has(entity) && ...))
+						break;
+
+					++index;
+				}
+			}
+
+		private:
+			uint32_t index;
+			uint32_t end;
+			EntityView* view;
 		};
 
 		class ConstIterator
 		{
 		public:
-			ConstIterator(std::vector<Entity>::const_iterator it, const std::tuple<ComponentPool<T>*...>& pools)
-				: m_It(it), m_Pools(pools) {}
-
-			std::tuple<Entity, const T&...> operator*() const
+			ConstIterator(uint32_t index, uint32_t end, const EntityView* view)
+				: index(index), end(end), view(view)
 			{
-				return std::forward_as_tuple(*m_It, std::get<ComponentPool<T>*>(m_Pools)->Get(*m_It)...);
+				_SkipInvalid();
 			}
 
-			ConstIterator& operator++() { ++m_It; return *this; }
-			ConstIterator operator++(int) { ConstIterator tmp = *this; ++(*this); return tmp; }
+			ConstIterator& operator++() {
+				++index;
+				_SkipInvalid();
+				return *this;
+			}
 
-			bool operator==(const ConstIterator& other) const { return m_It == other.m_It; }
-			bool operator!=(const ConstIterator& other) const { return !(*this == other); }
+			bool operator !=(const ConstIterator& other) const {
+				return index != other.index;
+			}
+
+			auto operator*() const {
+				Entity entity = view->m_Smallest->GetEntityAt(index);
+				return std::forward_as_tuple(entity, std::get<ComponentPool<T>*>(view->m_Pools)->Get(entity)...);
+			}
 
 		private:
-			std::vector<Entity>::const_iterator m_It;
-			const std::tuple<ComponentPool<T>*...>& m_Pools;
+			void _SkipInvalid() {
+				if (!view->m_Smallest)
+					return;
+
+				while (index < end)
+				{
+					Entity entity = view->m_Smallest->GetEntityAt(index);
+
+					if ((std::get<ComponentPool<T>*>(view->m_Pools)->Has(entity) && ...))
+						break;
+
+					++index;
+				}
+			}
+
+		private:
+			uint32_t index;
+			uint32_t end;
+			const EntityView* view;
 		};
 
-	public:
-		EntityView(std::vector<Entity> entities, std::tuple<ComponentPool<T>*...> pools)
-			: m_Entities(std::move(entities)), m_Pools(std::move(pools)) {}
-
-		~EntityView() = default;
-
 		// ---
-		Iterator begin() { return Iterator(m_Entities.begin(), m_Pools); }
-		Iterator end() { return Iterator(m_Entities.end(), m_Pools); }
+		Iterator begin() { 
+			if (!m_Smallest)
+				return Iterator(0, 0, this);
 
-		ConstIterator begin() const { return ConstIterator(m_Entities.begin(), m_Pools); }
-		ConstIterator end() const { return ConstIterator(m_Entities.end(), m_Pools); }
+			return Iterator(0, m_Smallest->size(), this);
+		}
 
-		size_t size() const { return m_Entities.size(); }
-		bool empty() const { return m_Entities.empty(); }
+		Iterator end() { 
+			if (!m_Smallest)
+				return Iterator(0, 0, this);
+
+			return Iterator(m_Smallest->size(), m_Smallest->size(), this); 
+		}
+
+		ConstIterator begin() const {
+			if (!m_Smallest)
+				return ConstIterator(0, 0, this);
+
+			return ConstIterator(0, m_Smallest->size(), this);
+		}
+
+		ConstIterator end() const {
+			if (!m_Smallest)
+				return ConstIterator(0, 0, this);
+
+			return ConstIterator(m_Smallest->size(), m_Smallest->size(), this);
+		}
+
+	private:
+		template <typename Tup, size_t... I>
+		static IComponentPool* _FindSmallestPoolImpl(const Tup& pools, std::index_sequence<I...>) {
+			IComponentPool* result = nullptr;
+			size_t smallestSize = MAX_ENTITIES;
+
+			auto check = [&](auto* pool) {
+				if (pool && pool->size() < smallestSize) {
+					smallestSize = pool->size();
+					result = pool;
+				}
+			};
+
+			(check(std::get<I>(pools)), ...);
+			return result;
+		}
+
+		static IComponentPool* _FindSmallestPool(const std::tuple<ComponentPool<T>*...>& pools) {
+			return _FindSmallestPoolImpl(pools, std::index_sequence_for<T...>{});
+		}
 	};
 
 	// --------------------------------------------------
@@ -86,7 +186,7 @@ namespace Davos {
 		~EntityManager();
 
 		// --- ENTITIES ---
-		Entity CreateEntity(Entity id = 0);
+		Entity CreateEntity();
 		//Entity CreatePrefab(Prefab::Type type, Entity id = 0);
 		Entity DuplicateEntity(Entity id);
 		void DestroyEntity(Entity id);
@@ -112,10 +212,7 @@ namespace Davos {
 		T& AddComponent(Entity id, const T& component) {
 			DVS_CORE_ASSERT(Exists(id), "Entity ID not found");
 
-			ComponentPool<T>* pool = _GetPool<T>();
-			if (!pool)
-				pool = _CreatePool<T>();
-
+			ComponentPool<T>* pool = _GetOrCreatePool<T>();
 			return pool->Add(id, component);
 		}
 
@@ -123,10 +220,7 @@ namespace Davos {
 		T& AddComponent(Entity id, Args&&... args) {
 			DVS_CORE_ASSERT(Exists(id), "Entity ID not found");
 
-			ComponentPool<T>* pool = _GetPool<T>();
-			if (!pool)
-				pool = _CreatePool<T>();
-
+			ComponentPool<T>* pool = _GetOrCreatePool<T>();
 			return pool->Add(id, std::forward<Args>(args)...);
 		}
 		
@@ -154,10 +248,7 @@ namespace Davos {
 		T& AddOrReplaceComponent(Entity id, const T& component) {
 			DVS_CORE_ASSERT(Exists(id), "Entity ID not found");
 
-			ComponentPool<T>* pool = _GetPool<T>();
-			if (!pool)
-				pool = _CreatePool<T>();
-
+			ComponentPool<T>* pool = _GetOrCreatePool<T>();
 			return pool->AddOrReplace(id, component);
 		}
 
@@ -165,10 +256,7 @@ namespace Davos {
 		T& AddOrReplaceComponent(Entity id, Args&&... args) {
 			DVS_CORE_ASSERT(Exists(id), "Entity ID not found");
 
-			ComponentPool<T>* pool = _GetPool<T>();
-			if (!pool)
-				pool = _CreatePool<T>();
-
+			ComponentPool<T>* pool = _GetOrCreatePool<T>();
 			return pool->AddOrReplace(id, std::forward<Args>(args)...);
 		}
 
@@ -209,80 +297,48 @@ namespace Davos {
 			return pool->Get(id);
 		}
 
-		////template <typename T>
-		////EntityView<T> GetView() {
-		////	ComponentPool<T>* pool = _GetPool<T>();
-		////	DVS_CORE_ASSERT(pool != nullptr, "Error Component Pool not found");
+		template <typename T>
+		T* TryGetComponent(Entity id) {
+			if (!Exists(id))
+				return nullptr;
 
-		////	std::vector<Entity> entities;
-		////	entities.reserve(pool->size());
+			ComponentPool<T>* pool = _GetPool<T>();
+			if (!pool)
+				return nullptr;
 
-		////	for (uint32_t i = 0, size = pool->size(); i < size; ++i)
-		////	{
-		////		Entity entity = pool->GetEntityAt(i);
-		////		entities.push_back(entity);
-		////	}
+			return pool->TryGet(id);
+		}
 
-		////	return EntityView<T>(std::move(entities), std::make_tuple(pool));
-		////}
+		template <typename T>
+		const T* TryGetComponent(Entity id) const {
+			if (!Exists(id))
+				return nullptr;
 
-		////template <typename T>
-		////const EntityView<T> GetView() const {
-		////	ComponentPool<T>* pool = _GetPool<T>();
-		////	DVS_CORE_ASSERT(pool != nullptr, "Error Component Pool not found");
+			ComponentPool<T>* pool = _GetPool<T>();
+			if (!pool)
+				return nullptr;
 
-		////	std::vector<Entity> entities;
-		////	entities.reserve(pool->size());
-
-		////	for (uint32_t i = 0, size = pool->size(); i < size; ++i)
-		////	{
-		////		Entity entity = pool->GetEntityAt(i);
-		////		entities.push_back(entity);
-		////	}
-
-		////	return EntityView<T>(std::move(entities), std::make_tuple(pool));
-		////}
+			return pool->TryGet(id);
+		}
 
 		template <typename... T>
 		EntityView<T...> GetView() {
 			auto pools = std::make_tuple(_GetPool<T>()...);
-			DVS_CORE_ASSERT(((std::get<ComponentPool<T>*>(pools) != nullptr) && ...), "One or more Component Pools not found");
 
-			IComponentPool* smallestPool = _FindSmallestPool(std::get<ComponentPool<T>*>(pools)...);
-
-			std::vector<Entity> entities;
-			entities.reserve(smallestPool->size());
-
-			for (uint32_t i = 0, size = smallestPool->size(); i < size; ++i)
-			{
-				Entity entity = smallestPool->GetEntityAt(i);
-
-				if ((std::get<ComponentPool<T>*>(pools)->Has(entity) && ...))
-					entities.push_back(entity);
-			}
-
-			return EntityView<T...>(std::move(entities), pools);
+			if ((!std::get<ComponentPool<T>*>(pools) || ...))
+				return EntityView<T...>();
+			
+			return EntityView<T...>(pools);
 		}
 
 		template <typename... T>
 		const EntityView<T...> GetView() const {
 			auto pools = std::make_tuple(_GetPool<T>()...);
-			DVS_CORE_ASSERT(((std::get<ComponentPool<T>*>(pools) != nullptr) && ...), "One or more Component Pools not found");
 
-			IComponentPool* smallestPool = _FindSmallestPool(std::get<ComponentPool<T>*>(pools)...);
+			if ((!std::get<ComponentPool<T>*>(pools) || ...))
+				return EntityView<T...>();
 
-			std::vector<Entity> entities;
-			entities.reserve(smallestPool->size());
-
-			for (uint32_t i = 0, size = smallestPool->size(); i < size; ++i)
-			{
-				Entity entity = smallestPool->GetEntityAt(i);
-
-				if ((std::get<ComponentPool<T>*>(pools)->Has(entity) && ...))
-					entities.push_back(entity);
-			}
-
-			return EntityView<T...>(std::move(entities), pools);
+			return EntityView<T...>(pools);
 		}
 
 	private:
@@ -317,23 +373,6 @@ namespace Davos {
 			if (auto* pool = _GetPool<T>())
 				return pool;
 			return _CreatePool<T>();
-		}
-
-		template <typename... P>
-		static IComponentPool* _FindSmallestPool(P*... pools) {
-			IComponentPool* result = nullptr;
-			size_t smallestSize = MAX_ENTITIES;
-
-			auto check = [&](auto* pool) {
-				if (pool && pool->size() < smallestSize)
-				{
-					result = pool;
-					smallestSize = pool->size();
-				}
-			};
-
-			(check(pools), ...);
-			return result;
 		}
 
 	private:
