@@ -2,11 +2,11 @@
 #include "EntityManager.h"
 
 #include "Davos/Core/TimeStep.h"
+#include "Davos/Core/UUID.h"
 
 namespace Davos {
 
-	class Camera;
-	struct C_Camera;
+	class EditorCamera;
 
 	class Scene
 	{
@@ -14,29 +14,28 @@ namespace Davos {
 		Scene();
 		~Scene();
 
-		void OnUpdate(TimeStep dt);
-		void OnRender();
+		void OnUpdateRuntime(TimeStep dt);
+		void OnUpdateEditor(TimeStep dt, EditorCamera& camera);
+		
+		void OnStartRuntime();
+		void OnStopRuntime();
 
-		//void OnStart();
-		//void OnStop();
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetMainCamera() const { return m_MainCamera; }
 		void SetMainCamera(Entity camera);
 
+		bool IsRunning() const { return m_IsRunning; }
+		bool IsPaused() const { return m_IsPaused; }
+
+		void SetPaused(bool paused) { m_IsPaused = paused; }
+		void Step(int frames = 1) { m_StepFrames = frames; }
+
 		//UUID FindEntity(const std::string& name);
-
-		//bool IsRunning() const { return m_IsRunning; }
-		//bool IsPaused() const { return m_IsPaused; }
-
-		//void SetPaused(bool paused) { m_IsPaused = paused; }
-		//void Step(int frames = 1);
 
 		// -------------------------------------------
 		// --- ENTITIES ---
-		inline Entity CreateEntity() {
-			return m_EntityManager.CreateEntity();
-		}
+		Entity CreateEntity(UUID uid = 0);
 
 		inline Entity DuplicateEntity(Entity id) {
 			return m_EntityManager.DuplicateEntity(id);
@@ -126,14 +125,17 @@ namespace Davos {
 		}
 
 	private:
-		EntityManager m_EntityManager;
+		void _RenderScene();
 
-		Entity m_RootNode = MAX_ENTITIES;
+	private:
+		EntityManager m_EntityManager;
+		std::unordered_map<UUID, Entity> m_EntityMap;
+
 		Entity m_MainCamera = MAX_ENTITIES;
 
-		//bool m_IsRunning = false;
-		//bool m_IsPaused = false;
-		//int m_StepFrames = 0;
+		bool m_IsRunning = false;
+		bool m_IsPaused = false;
+		int m_StepFrames = 0;
 	};
 
 }

@@ -3,9 +3,10 @@
 
 #include "RenderCommand.h"
 #include "Camera.h"
-//#include "EditorCamera.h"
 #include "Shader.h"
 #include "Texture.h"
+
+#include "Davos/Editor/EditorCamera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -94,13 +95,13 @@ namespace Davos {
 		StartBatch();
 	}
 
-	//void Renderer::BeginScene(const EditorCamera& camera)
-	//{
-	//	s_Data.cameraBuffer.viewProjection = camera.GetViewProjection();
-	//	s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
+	void Renderer::BeginScene(const EditorCamera& camera)
+	{
+		s_Data.cameraBuffer.viewProjection = camera.GetViewProjection();
+		s_Data.cameraUniformBuffer->SetData(&s_Data.cameraBuffer, sizeof(RendererData::CameraData));
 
-	//	StartBatch();
-	//}
+		StartBatch();
+	}
 
 	void Renderer::EndScene()
 	{

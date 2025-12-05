@@ -5,6 +5,7 @@
 #include "ScriptableEntity.h"
 
 #include "Davos/Renderer/Renderer.h"
+#include "Davos/Editor/EditorCamera.h"
 
 namespace Davos {
 
@@ -22,27 +23,24 @@ namespace Davos {
 		}
 	}
 
-	void Scene::OnUpdate(TimeStep dt)
+	void Scene::OnUpdateRuntime(TimeStep dt)
 	{
-		//*** TODO: Move to Scene::OnScenePlay
-		auto view = m_EntityManager.GetView<C_NativeScript>();
-		for (auto [entity, script] : view)
+		// --- Update Entities ---
+		if (!m_IsPaused || m_StepFrames-- > 0)
 		{
-			Entity id = entity;
-			if (!script.instance)
+			// Update Native_Scripts
+			auto view = m_EntityManager.GetView<C_NativeScript>();
+			for (auto [entity, script] : view)
 			{
-				script.instance = script.InstantiateScript();
-				script.instance->m_Handle = id;
-				script.instance->m_Scene = this;
-				script.instance->OnCreate();
+				DVS_CORE_ASSERT(script.instance, "Error script has not been instantiated");
+				script.instance->OnUpdate(dt);
 			}
 
-			script.instance->OnUpdate(dt);
+			// Update Physics //***
+			// ...
 		}
-	}
 
-	void Scene::OnRender()
-	{
+		// --- Render Scene ---
 		if (m_MainCamera == MAX_ENTITIES)
 		{
 			DVS_CORE_WARN("MainCamera is not defined");
@@ -63,9 +61,79 @@ namespace Davos {
 			break;
 		}
 
-		// --- Render Scene ---
+		// Render
 		Renderer::BeginScene(mainCamera, mainCameraTransform);
+		_RenderScene();
+		Renderer::EndScene();
+	}
 
+	void Scene::OnUpdateEditor(TimeStep dt, EditorCamera& camera)
+	{
+		// --- Render Scene ---
+		Renderer::BeginScene(camera);
+		_RenderScene();
+		Renderer::EndScene();
+	}
+
+	void Scene::OnStartRuntime()
+	{
+		m_IsRunning = true;
+
+		// Instantiate Scripts
+		auto view = m_EntityManager.GetView<C_NativeScript>();
+		for (auto [entity, script] : view)
+		{
+			Entity id = entity;
+			if (!script.instance)
+			{
+				script.instance = script.InstantiateScript();
+				script.instance->m_Handle = id;
+				script.instance->m_Scene = this;
+				script.instance->OnCreate();
+			}
+		}
+	}
+
+	void Scene::OnStopRuntime()
+	{
+		m_IsRunning = false;
+	}
+
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		// Resize all Non-FixedAspectRatio Cameras
+		auto view = m_EntityManager.GetView<C_Camera>();
+		for (auto [entity, camera] : view)
+		{
+			if (camera.isFixedAspectRatio)
+				continue;
+
+			camera.camera.SetViewportSize(width, height);
+		}
+	}
+
+	void Scene::SetMainCamera(Entity id)
+	{
+		DVS_CORE_ASSERT(id < MAX_ENTITIES, "Invalid Entity ID");
+		DVS_CORE_ASSERT(m_EntityManager.HasComponent<C_Camera>(id), "Entity doesn't have Camera component");
+
+		m_MainCamera = id;
+	}
+
+	// -----------------------------------------------
+	Entity Scene::CreateEntity(UUID uid)
+	{
+		Entity entity = m_EntityManager.CreateEntity();
+
+		UUID id = (uid == 0) ? UUID() : uid;
+		m_EntityManager.AddComponent<C_UUID>(entity, id);
+
+		return entity;
+	}
+
+	// -----------------------------------------------
+	void Scene::_RenderScene()
+	{
 		// Sprites
 		const auto spriteView = m_EntityManager.GetView<C_Transform, C_SpriteRenderer>();
 		for (const auto& [entity, transform, sprite] : spriteView)
@@ -139,50 +207,6 @@ namespace Davos {
 				//Renderer::DrawTile(tileTransform, tileMap.tileset.texture.get(), tileCoords, { tileScale.x, tileScale.y }, tileMap.tintColor);
 			}
 		}
-
-		Renderer::EndScene();
 	}
 
-	void Scene::OnViewportResize(uint32_t width, uint32_t height)
-	{
-		// Resize all Non-FixedAspectRatio Cameras
-		auto view = m_EntityManager.GetView<C_Camera>();
-		for (auto [entity, camera] : view)
-		{
-			if (camera.isFixedAspectRatio)
-				continue;
-
-			camera.camera.SetViewportSize(width, height);
-		}
-	}
-
-	void Scene::SetMainCamera(Entity id)
-	{
-		DVS_CORE_ASSERT(id < MAX_ENTITIES, "Invalid Entity ID");
-		DVS_CORE_ASSERT(m_EntityManager.HasComponent<C_Camera>(id), "Entity doesn't have Camera component");
-
-		m_MainCamera = id;
-	}
-
-	//// -----------------------------------------------
-	//Entity Scene::CreateEntity(Entity id)
-	//{
-	//	//UUID entity = (id != 0) ? id : UUID();
-	//	//m_EntityHandles[entity] = m_EntityManager.CreateEntity();
-
-	//	//---
-	//	Entity parent = (parentID != 0) ? m_EntityHandles[parentID] : m_EntityHandles[m_RootNode];
-
-	//	// Always add C_Hierarchy to every Entity
-	//	AddComponent<C_Hierarchy>(entity, parent);
-
-	//	auto& ch = GetComponent<C_Hierarchy>(parent);
-	//	ch.numChilds++;
-	//	ch.firstChild = entity;
-
-	//	// Always add C_Tag to every Entity
-	//	AddComponent<C_Tag>(entity, name.c_str());
-
-	//	return entity;
-	//}
 }
