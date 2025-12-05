@@ -18,10 +18,10 @@ namespace Davos {
 		void BindFramebuffer() const;
 		void UnbindFramebuffer() const;
 
-		bool IsFocused() const { return m_ViewportFocused; }
-		bool IsHovered() const { return m_ViewportHovered; }
+		bool IsFocused() const { return m_IsFocused; }
+		bool IsHovered() const { return m_IsHovered; }
 
-		const glm::vec2& GetViewportSize() const { return m_ViewportSize; }
+		const glm::vec2& GetPanelSize() const { return m_PanelSize; }
 		const glm::vec2& GetPanelPosition() const { return m_PanelPosition; }
 
 		// --- Grid
@@ -34,10 +34,9 @@ namespace Davos {
 		void SetGridSize(float size) { if (size >= 1.0f) m_GridSize = size; }
 
 	private:
-		bool m_ViewportFocused = false;
-		bool m_ViewportHovered = false;
-		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
-
+		bool m_IsFocused = false;
+		bool m_IsHovered = false;
+		glm::vec2 m_PanelSize = glm::vec2(0.0f);
 		glm::vec2 m_PanelPosition = glm::vec2(0.0f);
 
 		Ref<Framebuffer> m_Framebuffer;

@@ -25,16 +25,16 @@ namespace Davos {
 		ImVec2 viewportPos = ImGui::GetCursorScreenPos();
 		m_PanelPosition = { viewportPos.x, viewportPos.y };
 
-		m_ViewportFocused = ImGui::IsWindowFocused();
-		m_ViewportHovered = ImGui::IsWindowHovered();
+		m_IsFocused = ImGui::IsWindowFocused();
+		m_IsHovered = ImGui::IsWindowHovered();
 
-		Application::Get().GetImGuiLayer()->SetBlockEvents(!m_ViewportHovered);
+		Application::Get().GetImGuiLayer()->SetBlockEvents(!m_IsHovered);
 
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+		m_PanelSize = { viewportSize.x, viewportSize.y };
 
 		uint64_t textureID = m_Framebuffer->GetColorAttachmentID();
-		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2(m_ViewportSize.x, m_ViewportSize.y), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2(m_PanelSize.x, m_PanelSize.y), ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -43,10 +43,10 @@ namespace Davos {
 	bool PanelViewport::OnResize()
 	{
 		if (FB_Specs spec = m_Framebuffer->GetSpecification();
-			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
-			(spec.width != m_ViewportSize.x || spec.height != m_ViewportSize.y))
+			m_PanelSize.x > 0.0f && m_PanelSize.y > 0.0f && // zero sized framebuffer is invalid
+			(spec.width != m_PanelSize.x || spec.height != m_PanelSize.y))
 		{
-			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_Framebuffer->Resize((uint32_t)m_PanelSize.x, (uint32_t)m_PanelSize.y);
 			return true;
 		}
 
