@@ -15,7 +15,7 @@
 
 namespace Davos {
 
-	static constexpr float s_MinZoom = 0.25f;
+	static constexpr float s_MinZoom = 1.0f;
 	static constexpr float s_MaxZoom = 20.0f;
 
 	// ---------------------------------
@@ -77,10 +77,9 @@ namespace Davos {
 		glm::mat4 invViewProj = glm::inverse(m_ProjectionMatrix * m_ViewMatrix);
 		glm::vec4 worldPos = invViewProj * clipPos;
 		worldPos /= worldPos.w;
-		//glm::vec2 worldPos = ScreenToWorld(mouseViewport);
 
 		m_Zoom -= e.GetYOffset();
-		m_Zoom = std::max(m_Zoom, s_MinZoom);
+		m_Zoom = glm::clamp(m_Zoom, s_MinZoom, s_MaxZoom);
 		_UpdateProjection();
 
 		glm::vec4 offset = glm::inverse(m_ProjectionMatrix) * clipPos;
