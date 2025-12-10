@@ -18,7 +18,8 @@ namespace Davos {
 			{ ShaderDataType::FLOAT_4, "a_Color"        },
 			{ ShaderDataType::FLOAT_2, "a_TexCoords"    },
 			{ ShaderDataType::FLOAT,   "a_TexIndex"     },
-			{ ShaderDataType::FLOAT,   "a_TilingFactor" }
+			{ ShaderDataType::FLOAT,   "a_TilingFactor" },
+			{ ShaderDataType::INT,     "a_EntityID"		}
 		});
 		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
@@ -70,13 +71,14 @@ namespace Davos {
 		return true;
 	}
 
-	void Quad::SetVertex(const glm::vec3& position, const glm::vec4& color, const glm::vec2& texCoords, const float texIndex, const float tilingFactor)
+	void Quad::SetVertex(const glm::vec3& position, const glm::vec4& color, const glm::vec2& texCoords, const float texIndex, const float tilingFactor, const int entityID)
 	{
 		m_VertexBufferPtr->position = position;
 		m_VertexBufferPtr->color = color;
 		m_VertexBufferPtr->texCoords = texCoords;
 		m_VertexBufferPtr->texIndex = texIndex;
 		m_VertexBufferPtr->tilingFactor = tilingFactor;
+		m_VertexBufferPtr->entityID = entityID;
 		m_VertexBufferPtr++;
 	}
 
@@ -89,7 +91,8 @@ namespace Davos {
 		m_VertexBuffer = VertexBuffer::Create(MaxVertices * sizeof(LineVertex));
 		m_VertexBuffer->SetLayout({
 			{ ShaderDataType::FLOAT_3, "a_Position" },
-			{ ShaderDataType::FLOAT_4, "a_Color"    }
+			{ ShaderDataType::FLOAT_4, "a_Color"    },
+			{ ShaderDataType::INT,     "a_EntityID"	}
 		});
 		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 		m_VertexBufferBase = new LineVertex[MaxVertices];
@@ -119,10 +122,11 @@ namespace Davos {
 		return true;
 	}
 
-	void Line::SetVertex(const glm::vec3& position, const glm::vec4& color)
+	void Line::SetVertex(const glm::vec3& position, const glm::vec4& color, const int entityID)
 	{
 		m_VertexBufferPtr->position = position;
 		m_VertexBufferPtr->color = color;
+		m_VertexBufferPtr->entityID = entityID;
 		m_VertexBufferPtr++;
 	}
 

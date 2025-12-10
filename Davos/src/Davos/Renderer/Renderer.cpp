@@ -154,10 +154,10 @@ namespace Davos {
 
 	// --------------------------------------------------
 	// --- DRAW ---
-	void Renderer::DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color)
+	void Renderer::DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, int entityID)
 	{
-		s_Data.Line.SetVertex(start, color);
-		s_Data.Line.SetVertex(end, color);
+		s_Data.Line.SetVertex(start, color, entityID);
+		s_Data.Line.SetVertex(end, color, entityID);
 
 		s_Data.Line.Add();
 
@@ -208,7 +208,7 @@ namespace Davos {
 		DrawQuad(transform, color);
 	}
 
-	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID)
 	{
 		constexpr size_t QuadVertexCount = 4;
 		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -225,7 +225,8 @@ namespace Davos {
 				color,
 				textureCoords[i],
 				textureIndex,
-				tilingFactor
+				tilingFactor,
+				entityID
 			);
 		}
 
@@ -244,7 +245,7 @@ namespace Davos {
 		DrawSprite(transform, texture, tintColor, tilingFactor);
 	}
 
-	void Renderer::DrawSprite(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer::DrawSprite(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor, int entityID)
 	{
 		constexpr size_t QuadVertexCount = 4;
 		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -279,7 +280,8 @@ namespace Davos {
 				tintColor,
 				textureCoords[i],
 				textureIndex,
-				tilingFactor
+				tilingFactor,
+				entityID
 			);
 		}
 

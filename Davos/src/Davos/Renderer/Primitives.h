@@ -38,6 +38,8 @@ namespace Davos {
 
 			float texIndex;
 			float tilingFactor;
+
+			int entityID; // mouse picking
 		};
 
 	public:
@@ -49,7 +51,7 @@ namespace Davos {
 		void Add() override { m_IndexCount += 6; }
 
 		const uint32_t GetIndexCount() const { return m_IndexCount; }
-		void SetVertex(const glm::vec3& position, const glm::vec4& color, const glm::vec2& texCoords, const float texIndex, const float tilingFactor);
+		void SetVertex(const glm::vec3& position, const glm::vec4& color, const glm::vec2& texCoords, const float texIndex, const float tilingFactor, const int entityID = -1);
 	
 	private:
 		uint32_t m_IndexCount = 0;
@@ -63,6 +65,8 @@ namespace Davos {
 		struct LineVertex {
 			glm::vec3 position;
 			glm::vec4 color;
+
+			int entityID; // mouse picking
 		};
 
 	public:
@@ -74,7 +78,7 @@ namespace Davos {
 		void Add() override { m_VertexCount += 2; }
 
 		const uint32_t GetVertexCount() const { return m_VertexCount; }
-		void SetVertex(const glm::vec3& position, const glm::vec4& color);
+		void SetVertex(const glm::vec3& position, const glm::vec4& color, const int entityID = -1);
 
 	private:
 		uint32_t m_VertexCount = 0;

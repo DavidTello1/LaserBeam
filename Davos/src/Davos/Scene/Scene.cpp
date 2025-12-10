@@ -121,17 +121,6 @@ namespace Davos {
 	}
 
 	// -----------------------------------------------
-	Entity Scene::CreateEntity(UUID uid)
-	{
-		Entity entity = m_EntityManager.CreateEntity();
-
-		UUID id = (uid == 0) ? UUID() : uid;
-		m_EntityManager.AddComponent<C_UUID>(entity, id);
-
-		return entity;
-	}
-
-	// -----------------------------------------------
 	void Scene::_RenderScene()
 	{
 		// Sprites
@@ -139,74 +128,74 @@ namespace Davos {
 		for (const auto& [entity, transform, sprite] : spriteView)
 		{
 			if (sprite.texture.get())
-				Renderer::DrawSprite(transform.GetTransform(), sprite.texture, sprite.color, sprite.tilingFactor);
+				Renderer::DrawSprite(transform.GetTransform(), sprite.texture, sprite.color, sprite.tilingFactor, (int)entity);
 			else
-				Renderer::DrawQuad(transform.GetTransform(), sprite.color);
+				Renderer::DrawQuad(transform.GetTransform(), sprite.color, (int)entity);
 		}
 
-		// TileMap
-		const auto tileMapView = m_EntityManager.GetView<C_Transform, C_LevelMap>();
-		for (const auto& [entity, transform, tileMap] : tileMapView)
-		{
-			// Draw Grid
-			if (tileMap.isDrawGrid)
-			{
-				for (int i = 0; i < tileMap.gridSize.x + 1; ++i) // Vertical Lines
-				{
-					glm::vec3 start = glm::vec3(
-						transform.translation.x + (tileMap.cellSize.x * i),
-						transform.translation.y,
-						transform.translation.z + 0.1f //*** manual offset
-					);
+		//// TileMap
+		//const auto tileMapView = m_EntityManager.GetView<C_Transform, C_LevelMap>();
+		//for (const auto& [entity, transform, tileMap] : tileMapView)
+		//{
+		//	// Draw Grid
+		//	if (tileMap.isDrawGrid)
+		//	{
+		//		for (int i = 0; i < tileMap.gridSize.x + 1; ++i) // Vertical Lines
+		//		{
+		//			glm::vec3 start = glm::vec3(
+		//				transform.translation.x + (tileMap.cellSize.x * i),
+		//				transform.translation.y,
+		//				transform.translation.z + 0.1f //*** manual offset
+		//			);
 
-					glm::vec3 end = glm::vec3(
-						start.x,
-						start.y + (tileMap.cellSize.y * tileMap.gridSize.y),
-						start.z
-					);
+		//			glm::vec3 end = glm::vec3(
+		//				start.x,
+		//				start.y + (tileMap.cellSize.y * tileMap.gridSize.y),
+		//				start.z
+		//			);
 
-					Renderer::DrawLine(start, end, tileMap.gridColor);
-				}
+		//			Renderer::DrawLine(start, end, tileMap.gridColor);
+		//		}
 
-				for (int i = 0; i < tileMap.gridSize.y + 1; ++i) // Horizontal Lines
-				{
-					glm::vec3 start = glm::vec3(
-						transform.translation.x,
-						transform.translation.y + (tileMap.cellSize.y * i),
-						transform.translation.z + 0.1f //*** manual offset
-					);
+		//		for (int i = 0; i < tileMap.gridSize.y + 1; ++i) // Horizontal Lines
+		//		{
+		//			glm::vec3 start = glm::vec3(
+		//				transform.translation.x,
+		//				transform.translation.y + (tileMap.cellSize.y * i),
+		//				transform.translation.z + 0.1f //*** manual offset
+		//			);
 
-					glm::vec3 end = glm::vec3(
-						start.x + (tileMap.cellSize.x * tileMap.gridSize.x),
-						start.y,
-						start.z
-					);
+		//			glm::vec3 end = glm::vec3(
+		//				start.x + (tileMap.cellSize.x * tileMap.gridSize.x),
+		//				start.y,
+		//				start.z
+		//			);
 
-					Renderer::DrawLine(start, end, tileMap.gridColor);
-				}
-			}
+		//			Renderer::DrawLine(start, end, tileMap.gridColor);
+		//		}
+		//	}
 
-			// Draw TileMap
-			for (uint32_t i = 0; i < tileMap.cells.size(); ++i)
-			{
-				glm::vec3 tilePos = glm::vec3(
-					transform.translation.x + (tileMap.cellSize.x * (i % tileMap.gridSize.x)),
-					transform.translation.y + (tileMap.cellSize.y * (i / tileMap.gridSize.x)),
-					transform.translation.z
-				);
+		//	// Draw TileMap
+		//	for (uint32_t i = 0; i < tileMap.cells.size(); ++i)
+		//	{
+		//		glm::vec3 tilePos = glm::vec3(
+		//			transform.translation.x + (tileMap.cellSize.x * (i % tileMap.gridSize.x)),
+		//			transform.translation.y + (tileMap.cellSize.y * (i / tileMap.gridSize.x)),
+		//			transform.translation.z
+		//		);
 
-				glm::vec3 tileScale = glm::vec3(
-					transform.scale.x * tileMap.cellSize.x,
-					transform.scale.y * tileMap.cellSize.y,
-					transform.scale.z
-				);
+		//		glm::vec3 tileScale = glm::vec3(
+		//			transform.scale.x * tileMap.cellSize.x,
+		//			transform.scale.y * tileMap.cellSize.y,
+		//			transform.scale.z
+		//		);
 
-				glm::mat4 tileTransform = glm::translate(glm::mat4(1.0f), tilePos) * glm::scale(glm::mat4(1.0f), tileScale);
+		//		glm::mat4 tileTransform = glm::translate(glm::mat4(1.0f), tilePos) * glm::scale(glm::mat4(1.0f), tileScale);
 
-				Renderer::DrawQuad(tileTransform, tileMap.tintColor);
-				//Renderer::DrawTile(tileTransform, tileMap.tileset.texture.get(), tileCoords, { tileScale.x, tileScale.y }, tileMap.tintColor);
-			}
-		}
+		//		Renderer::DrawQuad(tileTransform, tileMap.tintColor);
+		//		//Renderer::DrawTile(tileTransform, tileMap.tileset.texture.get(), tileCoords, { tileScale.x, tileScale.y }, tileMap.tintColor);
+		//	}
+		//}
 	}
 
 }

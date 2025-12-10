@@ -22,6 +22,9 @@ namespace Davos {
 
 		void OnViewportResize(uint32_t width, uint32_t height);
 
+		Entity GetRootEntity() const { return m_Root; }
+		void SetRootEntity(Entity root) { m_Root = root; }
+
 		Entity GetMainCamera() const { return m_MainCamera; }
 		void SetMainCamera(Entity camera);
 
@@ -35,7 +38,9 @@ namespace Davos {
 
 		// -------------------------------------------
 		// --- ENTITIES ---
-		Entity CreateEntity(UUID uid = 0);
+		Entity CreateEntity() {
+			return m_EntityManager.CreateEntity();
+		}
 
 		inline Entity DuplicateEntity(Entity id) {
 			return m_EntityManager.DuplicateEntity(id);
@@ -129,8 +134,8 @@ namespace Davos {
 
 	private:
 		EntityManager m_EntityManager;
-		std::unordered_map<UUID, Entity> m_EntityMap;
 
+		Entity m_Root = MAX_ENTITIES;
 		Entity m_MainCamera = MAX_ENTITIES;
 
 		bool m_IsRunning = false;
