@@ -3,6 +3,8 @@
 
 #include "Davos/Core/KeyCodes.h"
 
+#include <sstream>
+
 namespace Davos {
 
 	class KeyEvent : public Event

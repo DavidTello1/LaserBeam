@@ -379,7 +379,6 @@ namespace Davos {
 		std::queue<Entity> m_AvailableIndices;
 		uint32_t m_NumEntities = 0;
 
-		//std::array<ComponentMask, MAX_ENTITIES> m_EntityMasks;		
 		std::unordered_map<std::type_index, Scope<IComponentPool>> m_ComponentPools;
 	};
 

@@ -142,7 +142,7 @@ namespace Davos {
 	{
 		glDeleteFramebuffers(1, &m_RenderID);
 
-		glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
+		glDeleteTextures((GLsizei)m_ColorAttachments.size(), m_ColorAttachments.data());
 		glDeleteTextures(1, &m_DepthAttachment);
 	}
 
@@ -151,7 +151,7 @@ namespace Davos {
 		if (m_RenderID) // Reset FB if it exists
 		{
 			glDeleteFramebuffers(1, &m_RenderID);
-			glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
+			glDeleteTextures((GLsizei)m_ColorAttachments.size(), m_ColorAttachments.data());
 			glDeleteTextures(1, &m_DepthAttachment);
 
 			m_ColorAttachments.clear();
@@ -167,7 +167,7 @@ namespace Davos {
 		if (m_ColorAttachmentSpecs.size())
 		{
 			m_ColorAttachments.resize(m_ColorAttachmentSpecs.size());
-			Utils::CreateTextures(isMultisample, m_ColorAttachments.data(), m_ColorAttachments.size());
+			Utils::CreateTextures(isMultisample, m_ColorAttachments.data(), (uint32_t)m_ColorAttachments.size());
 
 			for (size_t i = 0; i < m_ColorAttachments.size(); ++i)
 			{
@@ -189,7 +189,7 @@ namespace Davos {
 							Utils::GetGLTextureWrap(textureSpecs.wrapT),
 							m_Specs.width, 
 							m_Specs.height, 
-							i
+							(int)i
 						);
 						break;
 					}
@@ -207,7 +207,7 @@ namespace Davos {
 							Utils::GetGLTextureWrap(textureSpecs.wrapT),
 							m_Specs.width, 
 							m_Specs.height, 
-							i
+							(int)i
 						);
 						break;
 					}
@@ -247,7 +247,7 @@ namespace Davos {
 			DVS_CORE_ASSERT(m_ColorAttachments.size() <= 4);
 
 			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-			glDrawBuffers(m_ColorAttachments.size(), buffers);
+			glDrawBuffers((GLsizei)m_ColorAttachments.size(), buffers);
 		}
 		else if (m_ColorAttachments.empty())
 		{

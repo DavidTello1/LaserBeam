@@ -3,6 +3,8 @@
 
 #include "Davos/Core/MouseCodes.h"
 
+#include <sstream>
+
 namespace Davos {
 
 	class MouseMoveEvent : public Event
