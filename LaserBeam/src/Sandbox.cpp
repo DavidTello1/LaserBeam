@@ -3,7 +3,7 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
-Sandbox::Sandbox() : Layer("Sandbox"), m_CameraController(1280.0f / 720.0f)
+Sandbox::Sandbox() : Layer("Sandbox")
 {
 }
 
@@ -18,9 +18,6 @@ void Sandbox::OnCleanUp()
 
 void Sandbox::OnUpdate(Davos::TimeStep dt)
 {
-	// Update
-	m_CameraController.OnUpdate(dt);
-
 	// Render
 	Davos::Renderer::ResetStats();
 	{
@@ -90,23 +87,9 @@ void Sandbox::OnImGuiRender()
 
 	//ImGui::InputText("Text", &text.c_str(), text.length());
 
-	ImGui::Separator();
-	ImGui::Text("--- Scene Settings ---");
-
-	ImGui::PushItemWidth(100.0f);
-	static float moveSpeed = m_CameraController.GetMoveSpeed();
-	if (ImGui::DragFloat("Move Speed", &moveSpeed, 1.0f, 0.0f, 1000.0f, "%.1f"))
-		m_CameraController.SetMoveSpeed(moveSpeed);
-
-	static float zoomSensitivity = m_CameraController.GetZoomSensitivity();
-	if (ImGui::DragFloat("Zoom Sensitivity", &zoomSensitivity, 0.01f, 0.0f, 1.0f, "%.2f"))
-		m_CameraController.SetZoomSensitivity(zoomSensitivity);
-	ImGui::PopItemWidth();
-
 	ImGui::End();
 }
 
 void Sandbox::OnEvent(Davos::Event& e)
 {
-	m_CameraController.OnEvent(e);
 }

@@ -16,8 +16,6 @@ public:
 	void OnEvent(Davos::Event& e) override;
 
 private:
-	Davos::OrthographicCameraController m_CameraController;
-
 	//*** Debug
 	float m_SpriteRotation = 30.0f;
 	float m_RectRotationSpeed = 10.0f;
