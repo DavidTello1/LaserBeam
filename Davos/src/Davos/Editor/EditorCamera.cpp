@@ -65,6 +65,16 @@ namespace Davos {
 		//dispatcher.Dispatch<WindowResizeEvent>(DVS_BIND_EVENT_FN(EditorCamera::_OnWindowResized));
 	}
 
+	const glm::vec4& EditorCamera::GetViewportBounds() const
+	{
+		float left = m_Position.x - m_AspectRatio * m_Zoom;
+		float right = m_Position.x + m_AspectRatio * m_Zoom;
+		float bottom = m_Position.y - m_Zoom;
+		float top = m_Position.y + m_Zoom;
+
+		return { top, left, bottom, right };
+	}
+
 	// --------------------------------------------------
 	bool EditorCamera::_OnMouseScrolled(MouseScrollEvent& e)
 	{

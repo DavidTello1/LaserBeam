@@ -17,10 +17,11 @@ namespace Davos {
 		void OnUpdate(TimeStep dt);
 		void OnEvent(Event& e);
 
+		// --- Viewport
+		const glm::vec4& GetViewportBounds() const;
 		const glm::vec2& GetViewportSize() const { return glm::vec2(m_ViewportWidth, m_ViewportHeight); }
-		void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; _UpdateProjection(); }
-
 		const glm::vec2& GetViewportOffset() const { return m_ViewportOffset; }
+		void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; _UpdateProjection(); }
 		void SetViewportOffset(const glm::vec2& offset) { m_ViewportOffset = offset; }
 
 		// --- Matrices
