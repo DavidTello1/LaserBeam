@@ -1,5 +1,5 @@
 #pragma once
-#include "Node.h"
+#include <Davos.h>
 
 namespace Davos {
 
@@ -7,23 +7,12 @@ namespace Davos {
 	{
 	public:
 		PanelInspector() = default;
-		PanelInspector(const Ref<Scene>& scene);
-
 		~PanelInspector() = default;
 
-		void SetScene(const Ref<Scene>& scene);
-
-		void OnImGuiRender();
-
-		void SetSelectedNode(Node* node) { m_SelectedNode = node; }
+		void OnImGuiRender(const Ref<Scene>& scene, Entity selectedEntity);
 
 	private:
-		void _DrawComponents(Entity entity);
-
-	private:
-		Ref<Scene> m_Scene;
-
-		Node* m_SelectedNode = nullptr;
+		void _DrawComponents(const Ref<Scene>& scene, Entity entity);
 	};
 
 }

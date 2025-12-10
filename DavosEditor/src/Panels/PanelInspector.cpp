@@ -7,36 +7,12 @@
 
 namespace Davos {
 
-	PanelInspector::PanelInspector(const Ref<Scene>& scene)
-	{
-		SetScene(scene);
-	}
-
-	void PanelInspector::SetScene(const Ref<Scene>& scene)
-	{
-		m_Scene = scene;
-		m_SelectedNode = nullptr;
-	}
-
-	void PanelInspector::OnImGuiRender()
+	void PanelInspector::OnImGuiRender(const Ref<Scene>& scene, Entity selectedEntity)
 	{
 		ImGui::Begin("Inspector");
-		if (m_SelectedNode != nullptr)
-		{
-			//ImGui::Text("Name: %s", m_SelectedNode->name.c_str());
-			//ImGui::SameLine();
-			//ImGui::Button("Edit");
 
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
-			strncpy_s(buffer, sizeof(buffer), m_SelectedNode->name.c_str(), sizeof(buffer));
-			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-			{
-				m_SelectedNode->name = std::string(buffer);
-			}
-
-			_DrawComponents(m_SelectedNode->id);
-		}
+		if (selectedEntity != MAX_ENTITIES)
+			_DrawComponents(scene, selectedEntity);
 
 		ImGui::End();
 	}
@@ -81,9 +57,9 @@ namespace Davos {
 		return isOpen;
 	}
 
-	void PanelInspector::_DrawComponents(Entity entity)
+	void PanelInspector::_DrawComponents(const Ref<Scene>& scene, Entity entity)
 	{
-		C_Tag* tag = m_Scene->TryGetComponent<C_Tag>(entity);
+		C_Tag* tag = scene->TryGetComponent<C_Tag>(entity);
 		if (tag)
 		{
 			std::string& name = tag->name;
@@ -97,7 +73,7 @@ namespace Davos {
 			}
 		}
 
-		C_Transform* transform = m_Scene->TryGetComponent<C_Transform>(entity);
+		C_Transform* transform = scene->TryGetComponent<C_Transform>(entity);
 		if (transform && _DrawComponent<C_Transform>("Transform"))
 		{
 			ImGui::InputFloat("Layer", &transform->translation.z, 1.0f, 1.0f, "%.1f");
@@ -123,7 +99,7 @@ namespace Davos {
 			ImGui::TreePop();
 		}
 
-		C_Camera* camera = m_Scene->TryGetComponent<C_Camera>(entity);
+		C_Camera* camera = scene->TryGetComponent<C_Camera>(entity);
 		if (camera && _DrawComponent<C_Camera>("Camera"))
 		{
 			ImGui::Checkbox("Fixed Aspect Ratio", &camera->isFixedAspectRatio);
@@ -143,7 +119,7 @@ namespace Davos {
 			ImGui::TreePop();
 		}
 
-		C_SpriteRenderer* sprite = m_Scene->TryGetComponent<C_SpriteRenderer>(entity);
+		C_SpriteRenderer* sprite = scene->TryGetComponent<C_SpriteRenderer>(entity);
 		if (sprite && _DrawComponent<C_SpriteRenderer>("Sprite Renderer"))
 		{
 			ImGui::DragFloat("Tiling Factor", &sprite->tilingFactor, 1.0f, 0.0f, 0.0f, "%.2f");
@@ -157,7 +133,7 @@ namespace Davos {
 			ImGui::TreePop();
 		}
 
-		C_LevelMap* gridMap = m_Scene->TryGetComponent<C_LevelMap>(entity);
+		C_LevelMap* gridMap = scene->TryGetComponent<C_LevelMap>(entity);
 		if (gridMap && _DrawComponent<C_LevelMap>("Sprite Renderer"))
 		{
 			int gridSize[2] = { gridMap->gridSize.x, gridMap->gridSize.y };
