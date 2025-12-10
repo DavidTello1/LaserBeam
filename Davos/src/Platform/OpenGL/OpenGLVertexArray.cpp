@@ -31,6 +31,11 @@ namespace Davos {
 		glCreateVertexArrays(1, &m_RenderID);
 	}
 
+	OpenGLVertexArray::~OpenGLVertexArray()
+	{
+		glDeleteVertexArrays(1, &m_RenderID);
+	}
+
 	void OpenGLVertexArray::Bind() const
 	{
 		glBindVertexArray(m_RenderID);
@@ -52,16 +57,59 @@ namespace Davos {
 		const BufferLayout& layout = vertexBuffer->GetLayout();
 		for (const BufferElement& element : layout)
 		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(
-				index,
-				element.GetComponentCount(),
-				ShaderDataTypeToOpenGLBaseType(element.type),
-				element.isNormalized ? GL_TRUE : GL_FALSE,
-				layout.GetStride(),
-				(const void*)element.offset
-			);
-			index++;
+			switch (element.type)
+			{
+				case ShaderDataType::FLOAT:
+				case ShaderDataType::FLOAT_2:
+				case ShaderDataType::FLOAT_3:
+				case ShaderDataType::FLOAT_4:
+				{
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glVertexAttribPointer(m_VertexBufferIndex,
+						element.GetComponentCount(),
+						ShaderDataTypeToOpenGLBaseType(element.type),
+						element.isNormalized ? GL_TRUE : GL_FALSE,
+						layout.GetStride(),
+						(const void*)element.offset);
+					m_VertexBufferIndex++;
+					break;
+				}
+				case ShaderDataType::INT:
+				case ShaderDataType::INT_2:
+				case ShaderDataType::INT_3:
+				case ShaderDataType::INT_4:
+				case ShaderDataType::BOOL:
+				{
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glVertexAttribIPointer(m_VertexBufferIndex,
+						element.GetComponentCount(),
+						ShaderDataTypeToOpenGLBaseType(element.type),
+						layout.GetStride(),
+						(const void*)element.offset);
+					m_VertexBufferIndex++;
+					break;
+				}
+				case ShaderDataType::MAT_3:
+				case ShaderDataType::MAT_4:
+				{
+					uint8_t count = element.GetComponentCount();
+					for (uint8_t i = 0; i < count; i++)
+					{
+						glEnableVertexAttribArray(m_VertexBufferIndex);
+						glVertexAttribPointer(m_VertexBufferIndex,
+							count,
+							ShaderDataTypeToOpenGLBaseType(element.type),
+							element.isNormalized ? GL_TRUE : GL_FALSE,
+							layout.GetStride(),
+							(const void*)(element.offset + sizeof(float) * count * i));
+						glVertexAttribDivisor(m_VertexBufferIndex, 1);
+						m_VertexBufferIndex++;
+					}
+					break;
+				}
+				default:
+					DVS_CORE_ASSERT(false, "Unknown ShaderDataType!");
+			}
 		}
 
 		m_VertexBuffers.push_back(vertexBuffer);

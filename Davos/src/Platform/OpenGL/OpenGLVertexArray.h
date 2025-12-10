@@ -7,7 +7,7 @@ namespace Davos {
 	{
 	public:
 		OpenGLVertexArray();
-		virtual ~OpenGLVertexArray() = default;
+		virtual ~OpenGLVertexArray();
 
 		void Bind() const override;
 		void Unbind() const override;
@@ -20,7 +20,7 @@ namespace Davos {
 
 	private:
 		uint32_t m_RenderID;
-		//uint32_t m_VertexBufferIndex = 0;
+		uint32_t m_VertexBufferIndex = 0;
 
 		std::vector<Ref<VertexBuffer>> m_VertexBuffers;
 		Ref<IndexBuffer> m_IndexBuffer;
