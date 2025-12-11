@@ -34,12 +34,16 @@ namespace Davos {
 		float GetRotation() const { return m_Rotation; }
 		float GetRotationDegrees() const { return glm::degrees(m_Rotation); }
 		float GetZoom() const { return m_Zoom; }
+		float GetNearClip() const { return m_NearClip; }
+		float GetFarClip() const { return m_FarClip; }
 
 		// --- Setters
 		void SetPosition(glm::vec3 position) { m_Position = position; _UpdateView(); }
 		void SetRotation(float rotation) { m_Rotation = rotation; _UpdateView(); }
 		void SetRotationDegrees(float rotation_degrees) { m_Rotation = glm::radians(rotation_degrees); _UpdateView(); }
-		void SetZoom(float zoom) { m_Zoom = zoom; _UpdateView(); }
+		void SetZoom(float zoom) { m_Zoom = zoom; _UpdateProjection(); }
+		void SetNearClip(float nearClip) { m_NearClip = nearClip; _UpdateProjection(); }
+		void SetFarClip(float farClip) { m_FarClip = farClip; _UpdateProjection(); }
 
 	private:
 		bool _OnMouseScrolled(MouseScrollEvent& e);
