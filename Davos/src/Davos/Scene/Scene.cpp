@@ -41,7 +41,7 @@ namespace Davos {
 		}
 
 		// --- Render Scene ---
-		if (m_MainCamera == MAX_ENTITIES)
+		if (m_MainCamera == Entity::null)
 		{
 			DVS_CORE_WARN("MainCamera is not defined");
 			return;
@@ -83,7 +83,7 @@ namespace Davos {
 		auto view = m_EntityManager.GetView<C_NativeScript>();
 		for (auto [entity, script] : view)
 		{
-			Entity id = entity;
+			Entity id = Entity(entity); //*** generation is lost
 			if (!script.instance)
 			{
 				script.instance = script.InstantiateScript();
@@ -112,12 +112,12 @@ namespace Davos {
 		}
 	}
 
-	void Scene::SetMainCamera(Entity id)
+	void Scene::SetMainCamera(Entity entity)
 	{
-		DVS_CORE_ASSERT(id < MAX_ENTITIES, "Invalid Entity ID");
-		DVS_CORE_ASSERT(m_EntityManager.HasComponent<C_Camera>(id), "Entity doesn't have Camera component");
+		DVS_CORE_ASSERT(!entity.isNull(), "Invalid Entity");
+		DVS_CORE_ASSERT(m_EntityManager.HasComponent<C_Camera>(entity), "Entity doesn't have Camera component");
 
-		m_MainCamera = id;
+		m_MainCamera = entity;
 	}
 
 	// -----------------------------------------------

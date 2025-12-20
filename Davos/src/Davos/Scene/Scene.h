@@ -42,15 +42,15 @@ namespace Davos {
 			return m_EntityManager.CreateEntity();
 		}
 
-		inline Entity DuplicateEntity(Entity id) {
-			return m_EntityManager.DuplicateEntity(id);
+		//inline Entity DuplicateEntity(Entity entity) {
+		//	return m_EntityManager.DuplicateEntity(entity);
+		//}
+
+		inline void DestroyEntity(Entity entity) {
+			m_EntityManager.DestroyEntity(entity);
 		}
 
-		inline void DestroyEntity(Entity id) {
-			m_EntityManager.DestroyEntity(id);
-		}
-
-		//Entity CreatePrefab(Prefab::Type type, Entity id = 0);
+		//Entity CreatePrefab(Prefab::Type type, Entity entity = 0);
 
 		template <typename... T>
 		inline EntityView<T...> GetAllEntitiesWith() {
@@ -65,68 +65,93 @@ namespace Davos {
 		// -------------------------------------------
 		// --- COMPONENTS ---
 		template <typename T>
-		inline bool HasComponent(Entity id) const { 
-			return m_EntityManager.HasComponent<T>(id); 
+		inline bool HasComponent(Entity entity) const { 
+			return m_EntityManager.HasComponent<T>(entity); 
 		}
 
 		template <typename... T>
-		inline bool HasComponents(Entity id) const { 
-			return m_EntityManager.HasComponents<T...>(id); 
+		inline bool HasComponents(Entity entity) const { 
+			return m_EntityManager.HasComponents<T...>(entity); 
 		}
 
 		template <typename T>
-		inline T& AddComponent(Entity id, const T& component) {
-			return m_EntityManager.AddComponent<T>(id, component);
+		inline T& AddComponent(Entity entity, const T& component) {
+			return m_EntityManager.AddComponent<T>(entity, component);
 		}
 
 		template <typename T, typename... Args>
-		inline T& AddComponent(Entity id, Args&&... args) { 
-			return m_EntityManager.AddComponent<T>(id, std::forward<Args>(args)...); 
+		inline T& AddComponent(Entity entity, Args&&... args) { 
+			return m_EntityManager.AddComponent<T>(entity, std::forward<Args>(args)...); 
 		}
 
 		template <typename T>
 		inline T& ReplaceComponent(Entity entity, const T& component) {
-			return m_EntityManager.ReplaceComponent<T>(id, component);
+			return m_EntityManager.ReplaceComponent<T>(entity, component);
 		}
 
 		template <typename T, typename... Args>
 		inline T& ReplaceComponent(Entity entity, Args&&... args) {
-			return m_EntityManager.ReplaceComponent<T>(id, std::forward<Args>(args)...);
+			return m_EntityManager.ReplaceComponent<T>(entity, std::forward<Args>(args)...);
+		}
+
+		template <typename T>
+		inline T& AddOrReplaceComponent(Entity entity, const T& component) {
+			return m_EntityManager.AddOrReplaceComponent<T>(entity, component);
 		}
 
 		template <typename T, typename... Args>
-		inline T& AddOrReplaceComponent(Entity id, Args&&... args) { 
-			return m_EntityManager.AddOrReplaceComponent<T>(id, std::forward<Args>(args)...); 
+		inline T& AddOrReplaceComponent(Entity entity, Args&&... args) { 
+			return m_EntityManager.AddOrReplaceComponent<T>(entity, std::forward<Args>(args)...); 
 		}
 
 		template <typename T>
-		inline void RemoveComponent(Entity id) { 
-			m_EntityManager.RemoveComponent<T>(id); 
+		inline T& InsertComponentAfter(Entity newEntity, Entity entityIndex, const T& component) {
+			return m_EntityManager.InsertComponentAfter<T>(newEntity, entityIndex, component);
+		}
+
+		template <typename T, typename... Args>
+		inline T& InsertComponentAfter(Entity newEntity, Entity entityIndex, Args&&... args) {
+			return m_EntityManager.InsertComponentAfter<T>(newEntity, entityIndex, std::forward<Args>(args)...);
+		}
+
+		template <typename T>
+		inline void RemoveComponent(Entity entity) { 
+			m_EntityManager.RemoveComponent<T>(entity); 
 		}
 
 		template <typename... T>
-		inline void RemoveComponents(Entity id) { 
-			m_EntityManager.RemoveComponents<T...>(id); 
+		inline void RemoveComponents(Entity entity) { 
+			m_EntityManager.RemoveComponents<T...>(entity); 
 		}
 
 		template <typename T>
-		inline T& GetComponent(Entity id) {
-			return m_EntityManager.GetComponent<T>(id);
+		inline void RemoveComponentOrdered(Entity entity, uint32_t childCount = 0) {
+			m_EntityManager.RemoveComponentOrdered<T>(entity, childCount);
+		}
+
+		template <typename... T>
+		inline void RemoveComponentsOrdered(Entity entity, uint32_t childCount = 0) {
+			m_EntityManager.RemoveComponentsOrdered<T...>(entity, childCount);
 		}
 
 		template <typename T>
-		inline const T& GetComponent(Entity id) const {
-			return m_EntityManager.GetComponent<T>(id);
+		inline T& GetComponent(Entity entity) {
+			return m_EntityManager.GetComponent<T>(entity);
 		}
 
 		template <typename T>
-		inline T* TryGetComponent(Entity id) {
-			return m_EntityManager.TryGetComponent<T>(id);
+		inline const T& GetComponent(Entity entity) const {
+			return m_EntityManager.GetComponent<T>(entity);
 		}
 
 		template <typename T>
-		inline const T* TryGetComponent(Entity id) const {
-			return m_EntityManager.TryGetComponent<T>(id);
+		inline T* TryGetComponent(Entity entity) {
+			return m_EntityManager.TryGetComponent<T>(entity);
+		}
+
+		template <typename T>
+		inline const T* TryGetComponent(Entity entity) const {
+			return m_EntityManager.TryGetComponent<T>(entity);
 		}
 
 	private:
@@ -135,8 +160,8 @@ namespace Davos {
 	private:
 		EntityManager m_EntityManager;
 
-		Entity m_Root = MAX_ENTITIES;
-		Entity m_MainCamera = MAX_ENTITIES;
+		Entity m_Root = Entity::null;
+		Entity m_MainCamera = Entity::null;
 
 		bool m_IsRunning = false;
 		bool m_IsPaused = false;

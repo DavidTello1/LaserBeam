@@ -5,7 +5,9 @@ namespace Davos {
 
 	EntityManager::EntityManager()
 	{
-		for (Entity i = 0; i < MAX_ENTITIES; ++i)
+		m_Generations.fill(0);
+
+		for (uint32_t i = 0; i < MAX_ENTITIES; ++i)
 			m_AvailableIndices.push(i);
 	}
 
@@ -16,48 +18,61 @@ namespace Davos {
 	Entity EntityManager::CreateEntity()
 	{
 		DVS_CORE_ASSERT(m_NumEntities < MAX_ENTITIES, "Reached limit number of entities");
+		DVS_CORE_ASSERT(!m_AvailableIndices.empty(), "No available entity indices");
 
-		Entity index = m_AvailableIndices.front();
+		uint32_t index = m_AvailableIndices.front();
 		m_AvailableIndices.pop();
+
+		DVS_CORE_ASSERT(index < m_Generations.size(), "Entity index out of bounds");
+
+		Entity entity;
+		entity.index = index;
+		entity.generation = m_Generations[index];
 		++m_NumEntities;
-		return index;
-	}
 
-	Entity EntityManager::DuplicateEntity(Entity id)
-	{
-		Entity entity = CreateEntity();
-		
-		for (auto& [type, pool] : m_ComponentPools)
-		{
-			if (!pool->Has(id))
-				continue;
-
-			pool->Duplicate(id, entity);
-		}
-
-		//m_EntityMasks[entity] = m_EntityMasks[id];
 		return entity;
 	}
 
-	void EntityManager::DestroyEntity(Entity id)
+	//Entity EntityManager::DuplicateEntity(Entity entity)
+	//{
+	//	Entity newEntity = CreateEntity();
+	//	
+	//	for (auto& [type, pool] : m_ComponentPools)
+	//	{
+	//		if (!pool->Has(entity.index))
+	//			continue;
+
+	//		pool->Duplicate(newEntity.index, entity.index);
+	//	}
+
+	//	return newEntity;
+	//}
+
+	void EntityManager::DestroyEntity(Entity entity)
 	{
-		DVS_CORE_ASSERT(Exists(id), "Entity does not exist");
+		DVS_CORE_ASSERT(Exists(entity), "Entity does not exist");
+		DVS_CORE_ASSERT(entity.index < m_Generations.size(), "Entity index out of bounds");
 
 		for (auto& [type, pool] : m_ComponentPools)
 		{
-			if (!pool->Has(id))
+			if (!pool->Has(entity.index))
 				continue;
 
-			pool->Remove(id);
+			pool->Remove(entity.index);
 		}
 
-		m_AvailableIndices.push(id);
-		--m_NumEntities;
+		m_AvailableIndices.push(entity.index);
+		m_Generations[entity.index]++;
+
+		m_NumEntities--;
 	}
 
-	bool EntityManager::Exists(Entity id) const
+	bool EntityManager::Exists(Entity entity) const
 	{
-		return id < m_NumEntities; //***BUG invalid when removing and recycling entities
+		if (entity.index >= m_Generations.size())
+			return false;
+
+		return entity.generation == m_Generations[entity.index];
 	}
 
 }

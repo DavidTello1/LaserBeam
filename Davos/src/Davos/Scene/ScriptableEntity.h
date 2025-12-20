@@ -19,7 +19,7 @@ namespace Davos {
 		virtual void OnUpdate(TimeStep dt) {}
 
 	private:
-		Entity m_Handle = MAX_ENTITIES;
+		Entity m_Handle = Entity::null;
 		Scene* m_Scene = nullptr;
 
 		friend class Scene;
