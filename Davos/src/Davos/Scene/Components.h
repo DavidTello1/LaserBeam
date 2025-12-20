@@ -1,4 +1,5 @@
 #pragma once
+#include "Davos/Core/UUID.h"
 #include "Davos/Renderer/OrthographicCamera.h"
 #include "Davos/Renderer/Texture.h"
 
@@ -18,26 +19,29 @@ namespace Davos {
 		C_Tag(const char* name) : name(name) {};
 
 	public:
-		std::string name;
+		std::string name = "Entity";
 	};
 
-	//// ---
-	//struct C_Hierarchy
-	//{
-	//public:
-	//	C_Hierarchy() = default;
-	//	C_Hierarchy(const C_Hierarchy&) = default;
-	//	C_Hierarchy(const Entity& parent) : parent(parent) {}
+	// ---
+	struct C_Hierarchy
+	{
+	public:
+		C_Hierarchy() = default;
+		C_Hierarchy(const C_Hierarchy&) = default;
+		C_Hierarchy(const Entity& parent) : parent(parent) {}
 
-	//public:
-	//	Entity parent = MAX_ENTITIES;
+	public:
+		Entity parent = Entity::null;
+		uint32_t numChilds = 0;
 
-	//	size_t numChilds = 0;
-	//	Entity firstChild = MAX_ENTITIES;
+		Entity firstChild = Entity::null;
+		Entity lastChild = Entity::null;
+		Entity nextSibling = Entity::null;
+		Entity prevSibling = Entity::null;
 
-	//	Entity nextSibling = MAX_ENTITIES;
-	//	Entity prevSibling = MAX_ENTITIES;
-	//};
+		uint32_t totalChilds = 0;
+		uint32_t numParents = 0;
+	};
 
 	// ---
 	struct C_Transform
@@ -54,20 +58,6 @@ namespace Davos {
 
 			return glm::translate(glm::mat4(1.0f), translation) * rot * glm::scale(glm::mat4(1.0f), scale);
 		}
-
-		float GetLayer() const { return translation.z; }
-		float SetLayer(float layer) { translation.z = layer; }
-
-		const glm::vec2& GetPosition() const { return glm::vec2(translation.x, translation.y); }
-		void SetPosition(float x, float y) { translation.x = x; translation.y = y; }
-		void SetPosition(const glm::vec2& pos) { translation.x = pos.x; translation.y = pos.y; }
-
-		float GetRotationDegrees() const { return glm::degrees(rotation.z); }
-		void SetRotation(float degrees) { rotation.z = glm::radians(degrees); }
-
-		const glm::vec2& GetScale() const { return glm::vec2(scale.x, scale.y); }
-		void SetScale(float value) { scale.x = value; scale.y = value; }
-		void SetScale(const glm::vec2& value) { scale.x = value.x; scale.y = value.y; }
 
 	public:
 		glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
@@ -96,9 +86,9 @@ namespace Davos {
 		C_SpriteRenderer(const glm::vec4& color) : color(color) {}
 
 	public:
-		Ref<Texture2D> texture;
 		glm::vec4 color = glm::vec4(1.0f);
 		float tilingFactor = 1.0f;
+		Ref<Texture2D> texture;
 	};
 
 	// ---
