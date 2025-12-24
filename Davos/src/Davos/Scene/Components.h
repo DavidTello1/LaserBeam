@@ -11,6 +11,17 @@
 
 namespace Davos {
 
+	struct C_UUID
+	{
+	public:
+		C_UUID() = default;
+		C_UUID(const C_UUID&) = default;
+		C_UUID(const UUID id) : id(id) {}
+
+	public:
+		UUID id;
+	};
+
 	struct C_Tag
 	{
 	public:
