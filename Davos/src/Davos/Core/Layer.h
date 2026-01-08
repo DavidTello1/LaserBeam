@@ -16,6 +16,7 @@ namespace Davos {
 		virtual void OnUpdate(TimeStep dt) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
+		virtual void OnProcessLast() {}
 
 		inline const std::string& GetName() const { return m_DebugName; }
 

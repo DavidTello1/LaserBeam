@@ -57,6 +57,9 @@ namespace Davos {
 				for (Layer* layer : m_LayerStack)
 					layer->OnImGuiRender();
 				m_ImGuiLayer->End();
+
+				for (Layer* layer : m_LayerStack)
+					layer->OnProcessLast();
 			}
 
 			m_Window->OnUpdate();
