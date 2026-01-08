@@ -1,8 +1,12 @@
 #pragma once
+#include "Davos/Editor/EditorCamera.h"
+
 #include <Davos.h>
 #include <glm/glm.hpp>
 
 namespace Davos {
+
+	class KeyPressEvent;
 
 	class PanelViewport
 	{
@@ -11,27 +15,38 @@ namespace Davos {
 		~PanelViewport() = default;
 
 		void OnInit();
-		void OnRender();
+		void OnUpdate(TimeStep dt);
+
+		void OnImGuiRender(const Ref<Scene>& scene, Entity selectedEntity);
+		void OnEvent(Event& e);
+
+		void OnShortcuts(KeyCode key, bool isControl, bool isShift);
 
 		bool OnResize();
 
+		EditorCamera GetEditorCamera() const { return m_EditorCamera; }
+
+		// --- Framebuffer
 		void BindFramebuffer() const;
 		void UnbindFramebuffer() const;
+		void ClearFramebufferAttachment(uint32_t index, int value);
+		int ReadPixel(uint32_t attachmentID, int x, int y);
 
+		// --- Panel
 		bool IsFocused() const { return m_IsFocused; }
 		bool IsHovered() const { return m_IsHovered; }
 
 		const glm::vec2& GetPanelSize() const { return m_PanelSize; }
 		const glm::vec2& GetPanelPosition() const { return m_PanelPosition; }
 
-		// --- Grid
-		bool IsDrawGrid() const { return m_IsDrawGrid; }
+		// --- Gizmos
+		bool IsOverGizmo() const;
 
-		const glm::vec4& GetGridColor() const { return m_GridColor; }
-		void SetGridColor(const glm::vec4& color) { m_GridColor = color; }
+	private:
+		void _DrawToolbar();
 
-		float GetGridSize() const { return m_GridSize; }
-		void SetGridSize(float size) { if (size >= 1.0f) m_GridSize = size; }
+		void _RenderGizmos(const Ref<Scene>& scene, Entity selectedEntity);
+		void _RenderGrid();
 
 	private:
 		bool m_IsFocused = false;
@@ -41,9 +56,16 @@ namespace Davos {
 
 		Ref<Framebuffer> m_Framebuffer;
 
+		EditorCamera m_EditorCamera;
+
+		int m_GizmoType = -1;
+		float m_SnapDegrees = 15.0f;
+
 		bool m_IsDrawGrid = true;
 		float m_GridSize = 1.0f;
 		glm::vec4 m_GridColor = glm::vec4(0.4f);
+
+		bool m_IsDrawAxis = true;
 	};
 
 }
