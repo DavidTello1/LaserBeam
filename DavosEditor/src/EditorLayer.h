@@ -5,6 +5,16 @@
 
 namespace Davos {
 
+	class KeyPressEvent;
+	class MouseButtonPressEvent;
+
+	enum class EntityType
+	{
+		EMPTY = 0,
+		CAMERA,
+		SPRITE
+	};
+
 	class EditorLayer : public Layer
 	{
 	public:
@@ -19,33 +29,50 @@ namespace Davos {
 		void OnImGuiRender() override;
 		void OnEvent(Event& e) override;
 
+		void OnProcessLast() override;
+
 	private:
+		void _OnMousePicking();
+
+		// Input
+		bool _OnKeyPressed(KeyPressEvent& e);
+		bool _OnMouseButtonPressed(MouseButtonPressEvent& e);
+
+		// Entities
+		Entity _OnCreateEntity(EntityType type, Entity parent);
+		void _OnDestroyEntity(Entity id);
+		void _OnSelectEntity(Entity id);
+		//void _OnReparentEntity(Entity id, Entity newParent);
+		//void _OnReorderEntity(Entity id, uint8_t position);
+		void _MarkToDelete(Entity id);
+		std::vector<Entity> _GetAllChilds(Entity firstChild);
+
+		// Scene Serialization
+		void _NewScene();
+		void _OpenScene();
+		void _OpenScene(const std::filesystem::path& path);
+		void _SaveScene();
+		void _SaveSceneAs();
+		void _SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+
+		// ImGui
 		void _DrawMainMenubar();
 		void _DrawToolbar();
 		void _Dockspace();
 
 	private:
-		Ref<Scene> m_EditorScene;
 		Ref<Scene> m_ActiveScene;
+
+		Entity m_SelectedEntity = Entity::null;
+		Entity m_HoveredEntity = Entity::null;
+		std::vector<Entity> m_DirtyEntities;
 
 		// Panels
 		PanelViewport m_PanelViewport;
 		PanelHierarchy m_PanelHierarchy;
 		PanelInspector m_PanelInspector;
 
-		// -------------------------------------------------
-		//*** Debug
-		Entity m_Camera, m_Square, m_Sprite, m_RotatingSquare;
-
-		float m_SpriteRotation = 30.0f;
-		float m_RectRotationSpeed = 10.0f;
-		//std::string text = "Default Text";
-
-		float m_LineWidth = 1.0f;
-		glm::vec4 m_RectBackgroundColor = { 0.8f, 0.2f, 0.3f, 1.0f };
-		glm::vec4 m_RectBorderColor = { 0.3f, 0.7f, 0.2f, 0.0f };
-
-		Ref<Texture2D> m_Texture;
+		friend class PanelHierarchy; //*** just for testing
 	};
 
 }

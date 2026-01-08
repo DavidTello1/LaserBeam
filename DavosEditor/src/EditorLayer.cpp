@@ -2,8 +2,13 @@
 
 #include "NativeScripts/CameraController.h"
 
+#include <Davos/Scene/SceneSerializer.h>
+#include <Davos/Utils/PlatformUtils.h>
+
+#include <Davos/Events/KeyEvent.h>
+#include <Davos/Events/MouseEvent.h>
+
 #include <imgui/imgui.h>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace Davos {
 
@@ -13,64 +18,32 @@ namespace Davos {
 
 	void EditorLayer::OnInit()
 	{
-		m_EditorScene = CreateRef<Scene>();
-		m_ActiveScene = m_EditorScene;
+		//// Editor Assets
+		//m_Texture = Texture2D::Create("assets/textures/checkerboard.png");
+		////...
 
-		// Panels
+		// --- Scene
+		_NewScene();
+		Entity root = m_ActiveScene->CreateEntity();
+		m_ActiveScene->AddComponent<C_UUID>(root);
+		m_ActiveScene->AddComponent<C_Hierarchy>(root);
+		m_ActiveScene->AddComponent<C_Transform>(root);
+		m_ActiveScene->AddComponent<C_Tag>(root, "Root");
+		m_ActiveScene->SetRootEntity(root);
+
+		// --- Panels
 		m_PanelViewport.OnInit();
-		m_PanelHierarchy.SetScene(m_ActiveScene);
-		m_PanelInspector.SetScene(m_ActiveScene);
 
-		// Assets
-		m_Texture = Texture2D::Create("assets/textures/checkerboard.png");
-
+		// --- Renderer
 		//Renderer::SetLineWidth(m_LineWidth);
 
-		// -------------------------------------------
-		//// Camera
-		//m_Camera = m_ActiveScene->CreateEntity("Camera");
-		//m_ActiveScene->AddComponent<C_Transform>(m_Camera);
-		//m_ActiveScene->AddComponent<C_Camera>(m_Camera);
-		//m_ActiveScene->AddComponent<C_NativeScript>(m_Camera).Bind<CameraController>();
-		//m_ActiveScene->SetMainCamera(m_Camera);
-
-		//// Square
-		//m_Square = m_ActiveScene->CreateEntity("Square");
-		//m_ActiveScene->AddComponent<C_Transform>(m_Square);
-		//m_ActiveScene->AddComponent<C_SpriteRenderer>(m_Square, m_RectBackgroundColor);
-
-		//// Sprite
-		//m_Sprite = m_ActiveScene->CreateEntity("Sprite");
-		//auto& spriteTransform = m_ActiveScene->AddComponent<C_Transform>(m_Sprite);
-		//spriteTransform.translation = { 2.0f, 0.0f, 1.0f };
-		//spriteTransform.rotation = { 0.0f, 0.0f, glm::radians(m_SpriteRotation) };
-		//spriteTransform.scale = { 0.8f, 0.8f, 1.0f };
-		//auto& spriteRenderer = m_ActiveScene->AddComponent<C_SpriteRenderer>(m_Sprite);
-		//spriteRenderer.texture = m_Texture;
-
-		//// Rotating Square
-		//m_RotatingSquare = m_ActiveScene->CreateEntity("Rotating Square");
-		//auto& rsquareTransform = m_ActiveScene->AddComponent<C_Transform>(m_RotatingSquare);
-		//rsquareTransform.translation = { -2.5f, 0.0f, 1.0f };
-		//rsquareTransform.scale = { 2.0f, 2.0f, 1.0f };
-		//m_ActiveScene->AddComponent<C_SpriteRenderer>(m_RotatingSquare, m_RectBackgroundColor);
-
-		//// Quad Grid
-		//for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		//{
-		//	for (float x = -5.0f; x < 5.0f; x += 0.5f)
-		//	{
-		//		glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
-
-		//		UUID cell = m_ActiveScene->CreateEntity();
-
-		//		auto& cellTransform = m_ActiveScene->AddComponent<C_Transform>(cell);
-		//		cellTransform.translation = { x, y, 0.0f };
-		//		cellTransform.scale = { 0.45f, 0.45f, 1.0f };
-
-		//		m_ActiveScene->AddComponent<C_SpriteRenderer>(cell, color);
-		//	}
-		//}
+		//***
+		_OnCreateEntity(EntityType::CAMERA, root);
+		_OnCreateEntity(EntityType::SPRITE, root);
+		Entity empty = _OnCreateEntity(EntityType::EMPTY, root);
+		_OnCreateEntity(EntityType::SPRITE, empty);
+		m_PanelHierarchy.m_EditorLayer = this;
+		//---
 	}
 
 	void EditorLayer::OnCleanUp()
@@ -79,37 +52,32 @@ namespace Davos {
 
 	void EditorLayer::OnUpdate(TimeStep dt)
 	{
-		// --- Resize
-		m_PanelViewport.OnResize();
+		// --- Resize ---
+		if (m_PanelViewport.OnResize())
+		{
+			glm::vec2 viewportSize = m_PanelViewport.GetPanelSize();
+			m_ActiveScene->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+		}
 
-		glm::vec2 viewportSize = m_PanelViewport.GetViewportSize();
-		m_ActiveScene->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-
-		//// --- Update
-		//if (m_PanelViewport.IsFocused())
-		//	m_CameraController.OnUpdate(dt);
-
-		m_ActiveScene->OnUpdate(dt);
-
-		////*** DEBUG ***
-		//{ 
-		//	// Rotating Quad Update [make NATIVE_SCRIPT]
-		//	static float rotation = 0.0f;
-		//	rotation += m_RectRotationSpeed * dt;
-		//	if (rotation >= 360.0f)
-		//		rotation = 0.0f;
-		//	auto& rsquareTransform = m_ActiveScene->GetComponent<C_Transform>(m_RotatingSquare);
-		//	rsquareTransform.SetRotation(rotation);
-		//}
-
-		// --- Render
+		// --- Update & Render
 		Renderer::ResetStats();
 		m_PanelViewport.BindFramebuffer();
 
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderCommand::Clear();
 
-		m_ActiveScene->OnRender();
+		// --- Clear entity ID attachment to -1
+		m_PanelViewport.ClearFramebufferAttachment(1, -1);
+
+		//if (m_SceneState == SceneState::PLAY)
+			//m_ActiveScene->OnUpdateRuntime(dt);
+		//else if (m_SceneState == SceneState::EDIT)
+		{
+			m_ActiveScene->OnUpdateEditor(dt, m_PanelViewport.GetEditorCamera());
+			m_PanelViewport.OnUpdate(dt);
+			_OnMousePicking();
+		}
+
 		m_PanelViewport.UnbindFramebuffer();
 	}
 
@@ -125,12 +93,9 @@ namespace Davos {
 		_DrawToolbar();
 
 		// Panels
-		m_PanelViewport.OnRender();
-		m_PanelHierarchy.OnImGuiRender();
-
-		Node* node = m_PanelHierarchy.GetSelectedNode();
-		m_PanelInspector.SetSelectedNode(node);
-		m_PanelInspector.OnImGuiRender();
+		m_PanelViewport.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
+		m_PanelHierarchy.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
+		m_PanelInspector.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
 
 		//---------------------------------------------------
 		//*** DEBUG
@@ -140,77 +105,409 @@ namespace Davos {
 		ImGui::Text("--- Renderer Stats ---");
 		ImGui::Text("Draw Calls: %d", stats.drawCalls);
 		ImGui::Text("Quads: %d", stats.quadCount);
+		ImGui::Text("Lines: %d", stats.lineCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-
-		//ImGui::Separator();
-		//ImGui::Text("--- Scene Settings ---");
-
-		//ImGui::PushItemWidth(100.0f);
-
-		//m_SpriteRotation = m_ActiveScene->GetComponent<C_Transform>(m_Sprite).GetRotationDegrees();
-		//if (ImGui::DragFloat("Sprite Rotation", &m_SpriteRotation, 1.0f, -360.0f, 360.0f, "%.1f"))
-		//	m_ActiveScene->GetComponent<C_Transform>(m_Sprite).SetRotation(m_SpriteRotation);
-
-		//ImGui::DragFloat("Rect Rotation Speed", &m_RectRotationSpeed, 0.1f, -100.0f, 100.0f, "%.1f");
-
-		////ImGui::DragFloat("Line Width", &m_LineWidth, 0.1f, 1.0f, 5.0f, "%.1f");
-		//ImGui::PopItemWidth();
-
-		//ImGui::ColorEdit4("Rect Color", glm::value_ptr(m_ActiveScene->GetComponent<C_SpriteRenderer>(m_Square).color));
-		////ImGui::ColorEdit4("Rect Border Color", glm::value_ptr(m_RectBorderColor));
-
-		//////ImGui::InputText("Text", &text.c_str(), text.length());
-
-		////ImGui::Separator();
-		////ImGui::Text("--- Scene Settings ---");
-
-		////ImGui::PushItemWidth(100.0f);
-		////static float moveSpeed = m_CameraController.GetMoveSpeed();
-		////if (ImGui::DragFloat("Move Speed", &moveSpeed, 1.0f, 0.0f, 1000.0f, "%.1f"))
-		////	m_CameraController.SetMoveSpeed(moveSpeed);
-
-		////static float zoomSensitivity = m_CameraController.GetZoomSensitivity();
-		////if (ImGui::DragFloat("Zoom Sensitivity", &zoomSensitivity, 0.01f, 0.0f, 1.0f, "%.2f"))
-		////	m_CameraController.SetZoomSensitivity(zoomSensitivity);
-		////ImGui::PopItemWidth();
 
 		ImGui::End();
 	}
 
 	void EditorLayer::OnEvent(Event& e)
 	{
-		//C_CameraController camera = m_ActiveScene->GetComponent<C_CameraController>(m_Camera);
-		//camera.controller.OnEvent(e);
+		//if (m_SceneState == SceneState::EDIT)
+		//{
+			m_PanelViewport.OnEvent(e);
+		//}
 
-		//m_CameraController.OnEvent(e);
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<KeyPressEvent>(DVS_BIND_EVENT_FN(EditorLayer::_OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressEvent>(DVS_BIND_EVENT_FN(EditorLayer::_OnMouseButtonPressed));
 	}
 
-	// -----------------------------------------------
+	void EditorLayer::OnProcessLast()
+	{
+		// Deferred Entity deletion to avoid conflicts
+		for (Entity id : m_DirtyEntities)
+		{
+			if (id == m_ActiveScene->GetRootEntity()) // Root entity cannot be deleted
+				continue;
+
+			_OnDestroyEntity(id);
+		}
+		m_DirtyEntities.clear();
+	}
+
+	// --------------------------------------------------
+	void EditorLayer::_OnMousePicking()
+	{
+		glm::vec2 viewportSize = m_PanelViewport.GetPanelSize();
+		glm::vec2 mouse = Input::GetMouseScreenPos();
+		mouse -= m_PanelViewport.GetPanelPosition();
+		mouse.y = viewportSize.y - mouse.y; // inverted Y
+
+		int mouseX = (int)mouse.x;
+		int mouseY = (int)mouse.y;
+		if (mouseX < 0 || mouseY < 0 || mouseX >= (int)viewportSize.x || mouseY >= (int)viewportSize.y)
+			return;
+
+		int pixelData = m_PanelViewport.ReadPixel(1, mouseX, mouseY);
+		m_HoveredEntity = (pixelData == -1) ? Entity::null : Entity(pixelData);
+	}
+
+	// --------------------------------------------------
+	bool EditorLayer::_OnKeyPressed(KeyPressEvent& e)
+	{
+		// --- Shortcuts ---
+		if (e.IsRepeat())
+			return false;
+
+		bool control = Input::IsKeyPressed(Key::LEFT_CONTROL) || Input::IsKeyPressed(Key::RIGHT_CONTROL);
+		bool shift = Input::IsKeyPressed(Key::LEFT_SHIFT) || Input::IsKeyPressed(Key::RIGHT_SHIFT);
+
+		// --- SceneFile Commands
+		switch (e.GetKeyCode())
+		{
+			case Key::N:
+			{
+				if (control) { _NewScene(); }
+				break;
+			}
+			case Key::O:
+			{
+				if (control) { _OpenScene(); }
+				break;
+			}
+			case Key::S:
+			{
+				if (control) {
+					if (shift) { _SaveSceneAs(); }
+					else	   { _SaveScene(); }
+				}
+				break;
+			}
+
+			//// --- Scene Commands
+			//case Key::D:
+			//{
+			//	if (control)
+			//		OnDuplicateEntity();
+
+			//	break;
+			//}
+			//case Key::Delete:
+			//{
+			//	if (Application::Get().GetImGuiLayer()->GetActiveWidgetID() == 0)
+			//	{
+			//		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+			//		if (selectedEntity)
+			//		{
+			//			m_SceneHierarchyPanel.SetSelectedEntity({});
+			//			m_ActiveScene->DestroyEntity(selectedEntity);
+			//		}
+			//	}
+			//	break;
+			//}
+		}
+
+		// --- Viewport
+		m_PanelViewport.OnShortcuts(e.GetKeyCode(), control, shift);
+
+		return false;
+	}
+
+	bool EditorLayer::_OnMouseButtonPressed(MouseButtonPressEvent& e)
+	{
+		if (e.GetMouseButton() == Mouse::BUTTON_LEFT)
+		{
+			if (m_PanelViewport.IsHovered())
+			{
+				if (m_SelectedEntity.isNull() || (!m_SelectedEntity.isNull() && !m_PanelViewport.IsOverGizmo()))
+					m_SelectedEntity = m_HoveredEntity;
+			}
+		}
+
+		return false;
+	}
+
+	// --------------------------------------------------
+	Entity EditorLayer::_OnCreateEntity(EntityType type, Entity parent)
+	{
+		DVS_CORE_ASSERT(!parent.isNull(), "Trying to create entity with null parent");
+
+		C_Hierarchy& parentNode = m_ActiveScene->GetComponent<C_Hierarchy>(parent);
+
+		// Get Last Descendant (index where we will insert the ordered components)
+		Entity lastDescendant = parent;
+		if (parentNode.numChilds > 0)
+		{
+			C_Hierarchy* node = &parentNode;
+			while (node->lastChild != Entity::null)
+			{
+				lastDescendant = node->lastChild;
+				node = &m_ActiveScene->GetComponent<C_Hierarchy>(node->lastChild);
+			}
+		}
+
+		// Create Entity
+		Entity entity = m_ActiveScene->CreateEntity();
+
+		// Default Components (keep same order as scene tree)
+		m_ActiveScene->InsertComponentAfter<C_UUID>(entity, lastDescendant);
+		m_ActiveScene->InsertComponentAfter<C_Transform>(entity, lastDescendant);
+		C_Tag& tag = m_ActiveScene->InsertComponentAfter<C_Tag>(entity, lastDescendant);
+		C_Hierarchy& entityNode = m_ActiveScene->InsertComponentAfter<C_Hierarchy>(entity, lastDescendant, parent);
+
+		switch (type)
+		{
+			case EntityType::EMPTY:
+			{
+				tag.name = "Empty Entity";
+				break;
+			}
+
+			case EntityType::CAMERA:
+			{
+				tag.name = "Camera";
+				m_ActiveScene->AddComponent<C_Camera>(entity);
+				m_ActiveScene->AddComponent<C_NativeScript>(entity).Bind<CameraController>();
+
+				if (m_ActiveScene->GetMainCamera() == Entity::null)
+					m_ActiveScene->SetMainCamera(entity);
+				break;
+			}
+
+			case EntityType::SPRITE:
+			{
+				tag.name = "Sprite";
+				m_ActiveScene->AddComponent<C_SpriteRenderer>(entity);
+				break;
+			}
+		}
+
+		// Udpate Hierarchy Tree
+		entityNode.numParents = parentNode.numParents + 1;
+
+		if (parentNode.lastChild != Entity::null)
+		{
+			C_Hierarchy& lastChildNode = m_ActiveScene->GetComponent<C_Hierarchy>(parentNode.lastChild);
+
+			lastChildNode.nextSibling = entity;
+			entityNode.prevSibling = parentNode.lastChild;
+		}
+
+		if (parentNode.firstChild == Entity::null)
+			parentNode.firstChild = entity;
+
+		parentNode.numChilds++;
+		parentNode.totalChilds++;
+		parentNode.lastChild = entity;
+
+		// Update TotalChilds up the Tree
+		if (parentNode.parent != Entity::null)
+		{
+			C_Hierarchy* node = m_ActiveScene->TryGetComponent<C_Hierarchy>(parentNode.parent);
+			while (node != nullptr)
+			{
+				node->totalChilds++;
+				node = m_ActiveScene->TryGetComponent<C_Hierarchy>(node->parent);
+			}
+		}
+
+		DVS_CORE_TRACE("Created Entity with ID: {0} and parent: {1}", (int)entity.index, (int)parent.index);
+
+		return entity;
+	}
+
+	void EditorLayer::_OnDestroyEntity(Entity entity)
+	{
+		DVS_CORE_ASSERT(!entity.isNull(), "Invalid Entity");
+		DVS_CORE_ASSERT(entity != m_ActiveScene->GetRootEntity(), "Trying to delete root node");
+
+		const C_Hierarchy& entityNode = m_ActiveScene->GetComponent<C_Hierarchy>(entity);
+
+		// Update Sibling Nodes
+		if (entityNode.prevSibling != Entity::null)
+		{
+			auto& prevSibling = m_ActiveScene->GetComponent<C_Hierarchy>(entityNode.prevSibling);
+			prevSibling.nextSibling = entityNode.nextSibling;
+		}
+		if (entityNode.nextSibling != Entity::null)
+		{
+			auto& nextSibling = m_ActiveScene->GetComponent<C_Hierarchy>(entityNode.nextSibling);
+			nextSibling.prevSibling = entityNode.prevSibling;
+		}
+
+		// Update Parent Node
+		C_Hierarchy* parentNode = m_ActiveScene->TryGetComponent<C_Hierarchy>(entityNode.parent);
+		if (parentNode != nullptr)
+		{
+			if (parentNode->firstChild == entity) parentNode->firstChild = entityNode.nextSibling;
+			if (parentNode->lastChild  == entity) parentNode->lastChild  = entityNode.prevSibling;
+			parentNode->numChilds--;
+
+			// Update totalChilds up the tree
+			while (parentNode != nullptr)
+			{
+				parentNode->totalChilds -= (entityNode.totalChilds + 1);
+				parentNode = m_ActiveScene->TryGetComponent<C_Hierarchy>(parentNode->parent);
+			}
+		}
+
+		// Get all childs
+		std::vector<Entity> entities = _GetAllChilds(entityNode.firstChild);
+		entities.push_back(entity);
+
+		// Remove Default Components (keep SceneTree ordered)
+		m_ActiveScene->RemoveComponentsOrdered<C_UUID, C_Transform, C_Tag, C_Hierarchy>(entity, entityNode.totalChilds);
+
+		// Destroy entity and all of its childs
+		for (size_t i = 0; i < entities.size(); ++i)
+		{
+			Entity id = entities[i];
+			m_ActiveScene->DestroyEntity(id);
+
+			DVS_CORE_TRACE("Destroyed Entity with ID: {0}", (int)id.index);
+		}
+
+		m_SelectedEntity = Entity::null;
+	}
+
+	void EditorLayer::_OnSelectEntity(Entity entity)
+	{
+		m_SelectedEntity = entity;
+	}
+
+	void EditorLayer::_MarkToDelete(Entity entity)
+	{
+		m_DirtyEntities.push_back(entity);
+	}
+
+	std::vector<Entity> EditorLayer::_GetAllChilds(Entity firstChild)
+	{
+		std::vector<Entity> entities;
+
+		Entity child = firstChild;
+		while (child != Entity::null)
+		{
+			entities.push_back(child);
+			auto* node = &m_ActiveScene->GetComponent<C_Hierarchy>(child);
+
+			if (node->numChilds > 0)
+			{
+				std::vector<Entity> childs = _GetAllChilds(node->firstChild);
+				entities.insert(entities.end(), childs.begin(), childs.end());
+			}
+			child = node->nextSibling;
+		}
+
+		return entities;
+	}
+
+	// --------------------------------------------------
+	void EditorLayer::_NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+
+		//m_EditorScenePath = std::filesystem::path();
+	}
+
+	void EditorLayer::_OpenScene()
+	{
+		std::string filepath = FileDialogs::OpenFile("Davos Scene (*.davos)\0*.davos\0");
+		if (!filepath.empty())
+			_OpenScene(filepath);
+	}
+
+	void EditorLayer::_OpenScene(const std::filesystem::path& path)
+	{
+		//if (m_SceneState != SceneState::Edit)
+		//	OnSceneStop();
+
+		if (path.extension().string() != ".davos")
+		{
+			DVS_WARN("Could not load {0} - not a scene file", path.filename().string());
+			return;
+		}
+
+		Ref<Scene> newScene = CreateRef<Scene>();
+
+		SceneSerializer serializer(newScene);
+		if (serializer.Deserialize(path.string()))
+		{
+			m_ActiveScene = newScene;
+			//m_EditorScenePath = path;
+		}
+	}
+
+	void EditorLayer::_SaveScene()
+	{
+		//if (!m_EditorScenePath.empty())
+		//	_SerializeScene(m_ActiveScene, m_EditorScenePath);
+		//else
+			_SaveSceneAs();
+	}
+
+	void EditorLayer::_SaveSceneAs()
+	{
+		std::string filepath = FileDialogs::SaveFile("Davos Scene (*.davos)\0*.davos\0");
+		if (!filepath.empty())
+		{
+			_SerializeScene(m_ActiveScene, filepath);
+			//m_EditorScenePath = filepath;
+		}
+	}
+
+	void EditorLayer::_SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
+	}
+
+	// --------------------------------------------------
 	void EditorLayer::_DrawMainMenubar()
 	{
-		// --- Escena ---
-		// 
-		// New Scene (Ctrl+N)
-		// Open Scene (Ctrl+O)
-		// ---
-		// Save Scene (Ctrl+S)
-		// Save Scene As...
-		// Save All Scenes (Ctrl+Shift+S)
-		// ---
-		// Undo (Ctrl+Z)
-		// Redo (Ctrl+Shift+Z)
-		// ---
-		// Close Scene (Ctrl+Shift+W)
-		// ---
-		// Exit (Ctrl+Q)
+		if (ImGui::BeginMainMenuBar())
+		{
+			// --- File
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("New Scene", "Ctrl+N"))		{ _NewScene(); }
+				if (ImGui::MenuItem("Open Scene...", "Ctrl+O")) { _OpenScene(); }
+				ImGui::Separator();
 
+				if (ImGui::MenuItem("Save Scene", "Ctrl+S"))	{ _SaveScene(); }
+				if (ImGui::MenuItem("Save Scene As..."))		{ _SaveSceneAs(); }
+				if (ImGui::MenuItem("Save All Scenes", "Ctrl+Shift+S", nullptr, false)) { /*_SaveAllScenes();*/ }
+				ImGui::Separator();
 
-		// --- Proyecto ---
-		//
-		// Settings 
-		// Build
+				if (ImGui::MenuItem("Undo", "Ctrl+Z", nullptr, false))		 { /*_Undo();*/ }
+				if (ImGui::MenuItem("Redo", "Ctrl+Shift+Z", nullptr, false)) { /*_Redo();*/ }
+				ImGui::Separator();
 
+				if (ImGui::MenuItem("Close Scene", "Ctrl+Shift+W", nullptr, false)) { /*_CloseScene();*/ }
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Exit", "Ctrl+Q")) { Application::Get().Close(); }
+
+				ImGui::EndMenu();
+			}
+
+			// --- Project
+			if (ImGui::BeginMenu("Project"))
+			{
+				ImGui::MenuItem("Settings...");
+				ImGui::Separator();
+
+				ImGui::MenuItem("Build...", nullptr, nullptr, false);
+				ImGui::Separator();
+
+				ImGui::MenuItem("Reload Project", nullptr, nullptr, false);
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+		}
 
 		// --- Scene State --- (Centered)
 		//
