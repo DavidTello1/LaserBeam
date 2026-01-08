@@ -11,7 +11,7 @@ namespace Davos {
 	{
 		ImGui::Begin("Inspector");
 
-		if (selectedEntity != MAX_ENTITIES)
+		if (!selectedEntity.isNull())
 			_DrawComponents(scene, selectedEntity);
 
 		ImGui::End();
