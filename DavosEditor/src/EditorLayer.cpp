@@ -33,6 +33,7 @@ namespace Davos {
 
 		// --- Panels
 		m_PanelViewport.OnInit();
+		m_PanelAssets.OnInit();
 
 		// --- Renderer
 		//Renderer::SetLineWidth(m_LineWidth);
@@ -96,6 +97,7 @@ namespace Davos {
 		m_PanelViewport.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
 		m_PanelHierarchy.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
 		m_PanelInspector.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
+		m_PanelAssets.OnImGuiRender();
 
 		//---------------------------------------------------
 		//*** DEBUG

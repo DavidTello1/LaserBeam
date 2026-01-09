@@ -2,6 +2,7 @@
 #include "Panels/PanelViewport.h"
 #include "Panels/PanelHierarchy.h"
 #include "Panels/PanelInspector.h"
+#include "Panels/PanelAssets.h"
 
 namespace Davos {
 
@@ -71,6 +72,7 @@ namespace Davos {
 		PanelViewport m_PanelViewport;
 		PanelHierarchy m_PanelHierarchy;
 		PanelInspector m_PanelInspector;
+		PanelAssets m_PanelAssets;
 
 		friend class PanelHierarchy; //*** just for testing
 	};
