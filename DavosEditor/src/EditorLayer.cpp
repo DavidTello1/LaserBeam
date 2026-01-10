@@ -93,6 +93,10 @@ namespace Davos {
 		// ToolBar
 		_DrawToolbar();
 
+		// --- Change Cursor when Drag&Drop
+		if (const ImGuiPayload* payload = ImGui::GetDragDropPayload())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
+
 		// Panels
 		m_PanelViewport.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
 		m_PanelHierarchy.OnImGuiRender(m_ActiveScene, m_SelectedEntity);
