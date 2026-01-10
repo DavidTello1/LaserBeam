@@ -29,12 +29,15 @@ namespace Davos {
 	// --------------------------------------------------
 	void PanelAssets::_DrawNode(const std::filesystem::directory_entry& entry, bool isOpenDefault)
 	{
-		static const ImVec2 iconSize = ImVec2(16, 16);
+		static const float iconSize = 16.0f;
 
 		const bool isDir = entry.is_directory();
 		const std::filesystem::path& path = entry.path();
 
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth |
+			ImGuiTreeNodeFlags_OpenOnDoubleClick |
+			ImGuiTreeNodeFlags_OpenOnArrow |
+			ImGuiTreeNodeFlags_FramePadding;
 
 		if (isOpenDefault)
 			flags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -45,15 +48,27 @@ namespace Davos {
 		if (m_SelectedNode == path)
 			flags |= ImGuiTreeNodeFlags_Selected;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 12.0f));
 		ImGui::PushID(path.string().c_str());
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
 
 		bool isOpen = ImGui::TreeNodeEx("##node", flags);
+
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+		{
+			char itemPath[260];
+			strcpy_s(itemPath, path.string().c_str());
+
+			ImGui::SetDragDropPayload("ASSET_ITEM", itemPath, sizeof(itemPath));
+			ImGui::TextUnformatted(path.filename().string().c_str());
+			ImGui::EndDragDropSource();
+		}
+
 		if (ImGui::IsItemClicked())
 			m_SelectedNode = path;
 
 		ImGui::SameLine(0.0f, 1.0f);
-		ImGui::Image((ImTextureID)(isDir ? m_DirectoryIcon->GetRenderID() : m_FileIcon->GetRenderID()), iconSize, { 0,1 }, { 1,0 });
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ((ImGui::GetFrameHeight() - iconSize) * 0.5f));
+		ImGui::Image((ImTextureID)(isDir ? m_DirectoryIcon->GetRenderID() : m_FileIcon->GetRenderID()), ImVec2(iconSize, iconSize), { 0,1 }, { 1,0 });
 		ImGui::SameLine(0.0f, 4.0f);
 		ImGui::TextUnformatted(path.filename().string().c_str());
 
@@ -66,8 +81,8 @@ namespace Davos {
 			ImGui::TreePop();
 		}
 
-		ImGui::PopID();
 		ImGui::PopStyleVar();
+		ImGui::PopID();
 	}
 
 	std::vector<std::filesystem::directory_entry> PanelAssets::_SortDirectory(const std::filesystem::path& directory)
