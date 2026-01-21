@@ -55,7 +55,7 @@ namespace Davos {
 		//s_Data.Circle.Init(s_Data.MaxVertices, Shader::Create("assets/shaders/Circle.glsl"));
 		//s_Data.Text.Init(s_Data.MaxVertices, Shader::Create("assets/shaders/Text.glsl"));
 
-		s_Data.whiteTexture = Texture2D::Create(TextureSpecs());
+		s_Data.whiteTexture = Texture2D::Create("Default Texture", TextureSpecs());
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data.whiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 

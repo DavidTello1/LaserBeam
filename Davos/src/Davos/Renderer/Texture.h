@@ -34,6 +34,7 @@ namespace Davos {
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
+		virtual const std::string& GetName() const = 0;
 		virtual const std::string& GetPath() const = 0;
 		virtual bool IsLoaded() const = 0;
 
@@ -44,8 +45,8 @@ namespace Davos {
 	class Texture2D : public Texture
 	{
 	public:
-		static Ref<Texture2D> Create(const TextureSpecs& specs);
-		static Ref<Texture2D> Create(const std::string& path);
+		static Ref<Texture2D> Create(const std::string& name, const TextureSpecs& specs);
+		static Ref<Texture2D> Create(const std::string& name, const std::string& path);
 	};
 
 }

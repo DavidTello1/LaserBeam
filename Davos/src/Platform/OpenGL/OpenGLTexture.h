@@ -6,8 +6,8 @@ namespace Davos {
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
-		OpenGLTexture2D(const TextureSpecs& specs);
-		OpenGLTexture2D(const std::string& path);
+		OpenGLTexture2D(const std::string& name, const TextureSpecs& specs);
+		OpenGLTexture2D(const std::string& name, const std::string& path);
 		virtual ~OpenGLTexture2D();
 		
 		void SetData(void* data, uint32_t size) override;
@@ -20,6 +20,7 @@ namespace Davos {
 		uint32_t GetWidth() const override { return m_Width; }
 		uint32_t GetHeight() const override { return m_Height; }
 
+		const std::string& GetName() const override { return m_Name; }
 		const std::string& GetPath() const override { return m_Path; }
 		bool IsLoaded() const override { return m_IsLoaded; }
 
@@ -35,6 +36,7 @@ namespace Davos {
 		uint32_t m_Height = 0;
 
 		std::string m_Path;
+		std::string m_Name;
 		bool m_IsLoaded = false;
 
 		unsigned int m_InternalFormat = 0;

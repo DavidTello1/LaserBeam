@@ -36,7 +36,7 @@ namespace Davos {
 
 	// --------------------------------------------------
 	// --- TEXTURE 2D ---
-	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecs& specs) : m_Specs(specs), m_Width(specs.width), m_Height(specs.height)
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& name, const TextureSpecs& specs) : m_Name(name), m_Specs(specs), m_Width(specs.width), m_Height(specs.height)
 	{
 		m_InternalFormat = Utils::DavosImgFormatToGLInternalFormat(m_Specs.format);
 		m_DataFormat = Utils::DavosImgFormatToGLDataFormat(m_Specs.format);
@@ -51,7 +51,7 @@ namespace Davos {
 		glTextureParameteri(m_RenderID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path) : m_Path(path)
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& name, const std::string& path) : m_Name(name), m_Path(path)
 	{
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(true);

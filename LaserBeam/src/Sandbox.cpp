@@ -9,7 +9,7 @@ Sandbox::Sandbox() : Layer("Sandbox")
 
 void Sandbox::OnInit()
 {
-	m_Texture = Davos::Texture2D::Create("assets/textures/checkerboard.png");
+	m_Texture = Davos::Texture2D::Create("Checkerboard", "assets/textures/checkerboard.png");
 }
 
 void Sandbox::OnCleanUp()

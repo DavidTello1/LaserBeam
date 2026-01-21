@@ -10,8 +10,8 @@ namespace Davos {
 	{
 		m_BaseDirectory = s_AssetsPath;
 
-		m_DirectoryIcon = Texture2D::Create("res/icons/FolderIcon.png");
-		m_FileIcon = Texture2D::Create("res/icons/FileIcon.png");
+		m_DirectoryIcon = Texture2D::Create("FolderIcon", "res/icons/FolderIcon.png");
+		m_FileIcon = Texture2D::Create("FileIcon", "res/icons/FileIcon.png");
 	}
 
 	void PanelAssets::OnImGuiRender()
