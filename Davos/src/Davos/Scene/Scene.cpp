@@ -67,12 +67,39 @@ namespace Davos {
 		Renderer::EndScene();
 	}
 
-	void Scene::OnUpdateEditor(TimeStep dt, EditorCamera& camera)
+	void Scene::OnUpdateEditor(TimeStep dt, EditorCamera& camera, const Entity& selectedEntity)
 	{
 		// --- Render Scene ---
 		Renderer::BeginScene(camera);
 		_RenderScene();
 		Renderer::EndScene();
+
+		// --- Selection Highlight ---
+		if (!selectedEntity.isNull())
+		{
+			const C_Transform* transform = m_EntityManager.TryGetComponent<C_Transform>(selectedEntity);
+			const C_SpriteRenderer* sprite = m_EntityManager.TryGetComponent<C_SpriteRenderer>(selectedEntity);
+
+			if (transform && sprite)
+			{
+				static const float borderWidth = 4.0f; //px
+				static const glm::vec4 highlightColor = glm::vec4(0.79f, 0.51f, 0.37f, 1.0f);
+
+				glm::vec4 cameraBounds = camera.GetViewportBounds();
+				float orthoSize = cameraBounds.x - cameraBounds.z;
+				float worldUnitsPerPixel = orthoSize / camera.GetViewportSize().y;
+
+				float borderWorld = worldUnitsPerPixel * borderWidth;
+
+				C_Transform highlight = *transform;
+				highlight.scale.x += borderWorld * 2.0f;
+				highlight.scale.y += borderWorld * 2.0f;
+
+				Renderer::BeginScene(camera);
+				Renderer::DrawQuad(highlight.GetTransform(), highlightColor, (int)selectedEntity);
+				Renderer::EndScene();
+			}
+		}
 	}
 
 	void Scene::OnStartRuntime()

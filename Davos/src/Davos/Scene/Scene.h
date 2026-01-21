@@ -15,7 +15,7 @@ namespace Davos {
 		~Scene();
 
 		void OnUpdateRuntime(TimeStep dt);
-		void OnUpdateEditor(TimeStep dt, EditorCamera& camera);
+		void OnUpdateEditor(TimeStep dt, EditorCamera& camera, const Entity& selectedEntity);
 		
 		void OnStartRuntime();
 		void OnStopRuntime();

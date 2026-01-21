@@ -74,7 +74,7 @@ namespace Davos {
 			//m_ActiveScene->OnUpdateRuntime(dt);
 		//else if (m_SceneState == SceneState::EDIT)
 		{
-			m_ActiveScene->OnUpdateEditor(dt, m_PanelViewport.GetEditorCamera());
+			m_ActiveScene->OnUpdateEditor(dt, m_PanelViewport.GetEditorCamera(), m_SelectedEntity);
 			m_PanelViewport.OnUpdate(dt);
 			_OnMousePicking();
 		}
