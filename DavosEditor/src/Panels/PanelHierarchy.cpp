@@ -1,5 +1,6 @@
 #include "PanelHierarchy.h"
 
+#define IMGUI_DEFINE_MATH_OPERATORS //*** remove when decoupled from EditorLayer
 #include <imgui/imgui.h>
 
 #include "../EditorLayer.h" //***
