@@ -38,12 +38,9 @@ namespace Davos {
 
 	void PanelViewport::OnImGuiRender(const Ref<Scene>& scene, Entity selectedEntity)
 	{
-		// --- Toolbar
-		_DrawToolbar();
-
 		 // --- Viewport
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
+		bool isActive = ImGui::Begin("Viewport");
 
 		ImVec2 viewportPos = ImGui::GetCursorScreenPos();
 		m_PanelPosition = { viewportPos.x, viewportPos.y };
@@ -64,6 +61,10 @@ namespace Davos {
 
 		ImGui::End();
 		ImGui::PopStyleVar();
+
+		// --- Toolbar
+		if (isActive)
+			_DrawToolbar();
 
 		m_EditorCamera.SetViewportOffset(m_PanelPosition);
 	}
