@@ -456,11 +456,12 @@ namespace Davos::InspectorUtils {
 
     static bool FieldTexture(const char* id, const char* label, Ref<Texture2D>* texture, const Ref<Texture2D>& defaultTexture)
     {
-        static bool isOpen = false; //*** shared across all FieldTextures
-
         const std::string itemLabel = std::string(id) + label;
         const std::string widgetLabel = ((*texture) ? (*texture)->GetName() : "empty") + std::string("##") + itemLabel;
         const ImGuiID itemID = ImGui::GetID(itemLabel.c_str());
+
+        ImGuiStorage* storage = ImGui::GetStateStorage();
+        bool isOpen = storage->GetBool(itemID, false);
 
         bool isPressed = false;
         bool isReset = false;
@@ -478,11 +479,13 @@ namespace Davos::InspectorUtils {
         {
             isPressed = true;
             isOpen = !isOpen;
-        }
 
+        }
         if (*texture == nullptr)
             isOpen = false;
 
+        storage->SetFloat(itemID, isOpen);
+        
         if (isReset)
             *texture = defaultTexture;
 
