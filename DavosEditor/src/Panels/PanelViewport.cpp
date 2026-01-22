@@ -251,8 +251,8 @@ namespace Davos {
 		// --- Axis ---
 		if (m_IsDrawAxis)
 		{
-			static const glm::vec4 xColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-			static const glm::vec4 yColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			static const glm::vec4 xColor = glm::vec4(0.8f, 0.2f, 0.3f, 1.0f);
+			static const glm::vec4 yColor = glm::vec4(0.3f, 0.7f, 0.2f, 1.0f);
 
 			// X Axis
 			if (0.0f >= bottom && 0.0f <= top)
